@@ -5,8 +5,6 @@
  *
  */
 
-package ChatClient;
-
 import java.io.*;
 import java.net.Socket;
 
@@ -41,11 +39,11 @@ public class MessageSender implements Runnable{
             this.sender = new PrintWriter(this.socket.getOutputStream(), true);
             this.reader = new BufferedReader(new InputStreamReader((System.in)));
 
-            sender.println(this.reader.readLine());
+            this.sender.println(this.reader.readLine());
 
             do{
                 this.message = this.reader.readLine();
-                sender.println(message);
+                this.sender.println(message);
             }while(!this.message.equals("quit"));
         } catch (IOException ex) {
             System.out.println("Error getting input stream: " + ex.getMessage());

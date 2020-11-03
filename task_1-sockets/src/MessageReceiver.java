@@ -6,8 +6,6 @@
  */
 
 
-package ChatClient;
-
 import java.io.*;
 import java.net.Socket;
 
@@ -15,10 +13,9 @@ import java.net.Socket;
  * Handles the receiving of messages in the chat client. Implements runnable so t
  * he class operates in its own thread.
  */
-public class MessageReceiver implements Runnable{
+ class MessageReceiver implements Runnable{
 
     private Socket socket;
-    private volatile boolean exit = false;
 
     /**
      * Creates an instance if the MessageReceiver class.
@@ -26,10 +23,6 @@ public class MessageReceiver implements Runnable{
      */
     MessageReceiver(Socket socket){
         this.socket = socket;
-    }
-
-    public void stop(){
-        this.exit = true;
     }
 
     /**
