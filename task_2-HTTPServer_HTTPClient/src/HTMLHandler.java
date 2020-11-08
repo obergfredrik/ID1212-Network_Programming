@@ -1,36 +1,6 @@
 public class HTMLHandler {
 
-
-    private String getHeader(){
-
-        String header =  "<html>\n" +
-                    "        <head>\n" +
-                    "            <title>\n" +
-                    "                The Guessing Game\n" +
-                    "            </title>\n" +
-                    "        </head>\n" +
-                    "        <body>\n" +
-                    "            <h1>\n" +
-                    "                Welcome to the number guess game.\n" +
-                    "            </h1>\n" +
-                    "            <div>\n" +
-                    "                <h3>\n" +
-                    "                    I'm thinking of a number between 1 and 100. What's your guess?\n" +
-                    "                </h3>\n";
-
-        return header;
-    }
-
-    private String getForm(){
-
-        String form =    "<form method=\"POST\">\n" +
-                            "<input name=\"guess\" type=\"text\"/>\n" +
-                         "</form>\n";
-
-        return form;
-    }
-
-    String correctAnswer(int guesses){
+    String getCorrectAnswer(int guesses){
 
         String correct =       "<html>\n" +
                 "        <head>\n" +
@@ -51,7 +21,7 @@ public class HTMLHandler {
         return correct;
     }
 
-   String highAnswer(int guesses){
+   String getHighAnswer(int guesses){
 
             String high = "<html>\n" +
                     "        <head>\n" +
@@ -66,7 +36,9 @@ public class HTMLHandler {
                     "            <h3>" +
                     "                What's your guess?       " +
                     "            </h3>" +
-                                getForm() +
+                    "            <form method=\"POST\">\n" +
+                    "              <input name=\"guess\" type=\"text\"/>\n" +
+                    "            </form>\n" +
                     "        </body>\n" +
                     "</html>";
 
@@ -74,9 +46,9 @@ public class HTMLHandler {
 
    }
 
-   String lowAnswer(int guesses){
+   String getLowAnswer(int guesses){
 
-       String low =       "<html>\n" +
+       String low = "<html>\n" +
                "        <head>\n" +
                "            <title>\n" +
                "                The Guessing Game\n" +
@@ -89,16 +61,18 @@ public class HTMLHandler {
                "            <h3>" +
                "                What's your guess?       " +
                "            </h3>" +
-               getForm() +
+               "            <form method=\"POST\">\n" +
+               "               <input name=\"guess\" type=\"text\"/>\n" +
+               "            </form>\n" +
                "        </body>\n" +
-               "</html>";
+               "    </html>";
 
        return low;
    }
 
-   String incorrectInput(int guesses){
+   String getIncorrectInput(int guesses){
 
-       String low =       "<html>\n" +
+       String low = "<html>\n" +
                "        <head>\n" +
                "            <title>\n" +
                "                The Guessing Game\n" +
@@ -106,7 +80,7 @@ public class HTMLHandler {
                "        </head>\n" +
                "        <body>\n" +
                "            <h3>\n" +
-               "                You have made an incorrect guess! Either was the input not a number or either larger than 100 or smaller than 0. Please try again!" +
+               "                You have made an incorrect guess! The input was either not a number or not between 0 or 100. Please try again!" +
                "            </h3>\n" +
                "            <h3>" +
                "              You have made " + guesses + " guess(es)  .\n"+
@@ -114,25 +88,40 @@ public class HTMLHandler {
                "            <h3>" +
                "                What's your guess?       " +
                "            </h3>" +
-               getForm() +
+               "            <form method=\"POST\">\n" +
+               "              <input name=\"guess\" type=\"text\"/>\n" +
+               "            </form>\n" +
                "        </body>\n" +
-               "</html>";
+               "    </html>";
 
        return low;
 
    }
 
-   private String getFooter(){
-
-        String footer =   "</div>\n" +
-                        "</body>\n" +
-                "</html>";
-
-        return footer;
-    }
-
     String getInitialHTML(){
-        return getHeader() + getForm() + getFooter();
+
+        String initial = "<html>\n" +
+                    "        <head>\n" +
+                    "            <title>\n" +
+                    "                The Guessing Game\n" +
+                    "            </title>\n" +
+                    "        </head>\n" +
+                    "        <body>\n" +
+                    "            <h1>\n" +
+                    "                Welcome to the number guess game.\n" +
+                    "            </h1>\n" +
+                    "            <div>\n" +
+                    "                <h3>\n" +
+                    "                    I'm thinking of a number between 1 and 100. What's your guess?\n" +
+                    "                </h3>\n" +
+                    "                <form method=\"POST\">\n" +
+                    "                   <input name=\"guess\" type=\"text\"/>\n" +
+                    "                </form>\n" +
+                    "            </div>\n" +
+                    "         </body>\n" +
+                    "      </html>";
+
+        return initial;
     }
 
     String getBadRequestHtml(){

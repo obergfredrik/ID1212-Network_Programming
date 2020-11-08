@@ -2,13 +2,15 @@ import java.io.PrintWriter;
 
 public class HTTPHandler {
 
-    private PrintWriter sender;
+        private PrintWriter sender;
+        private HTMLHandler html;
 
     public HTTPHandler(PrintWriter sender) {
-        this.sender = sender;
+            this.sender = sender;
+            this.html = new HTMLHandler();
     }
 
-    boolean validateGETRequest(String request){
+    boolean validateRequest(String request){
 
 
             String[] line = request.split("[ \n\r]+");
@@ -62,43 +64,48 @@ public class HTTPHandler {
             return guessValue;
     }
 
-    void sendGuessResponse(String body){
-
-            byte[] responseBuffer = body.getBytes();
-
-            int contentLength = responseBuffer.length;
-
-            this.sender.println("HTTP/1.1 200 OK");
-            this.sender.println("Content-Length: " + contentLength);
-            this.sender.println("");
-            this.sender.println(body);
-            this.sender.flush();
-
+    void sendCorrectGuessResponse(int guesses){
+            sendOKResponse(this.html.getCorrectAnswer(guesses));
     }
 
-    void sendOKResponse(String body){
-
-
-            byte[] responseBuffer = body.getBytes();
-            int contentLength = responseBuffer.length;
-
-            this.sender.println("HTTP/1.1 200 OK");
-            this.sender.println("Content-Length: " + contentLength);
-            this.sender.println("");
-            this.sender.println(body);
-            this.sender.flush();
-
+    void sendHighGuessResponse(int guesses){
+            sendOKResponse(this.html.getHighAnswer(guesses));
     }
 
-    void sendBadRequestResponse(String body){
 
+    void sendLowGuessResponse(int guesses){
+            sendOKResponse(this.html.getLowAnswer(guesses));
+    }
+
+    void sendIncorrectInputResponse(int guesses){
+          sendOKResponse(this.html.getIncorrectInput(guesses));
+    }
+
+    void sendInitialResponse(){
+            sendOKResponse(this.html.getInitialHTML());
+    }
+
+    void sendBadRequestResponse(){
+
+            String body = this.html.getBadRequestHtml();
             byte[] responseBuffer = body.getBytes();
             int contentLength = responseBuffer.length;
-
-            System.out.println("i bad request vase response sdfsdf");
 
             this.sender.println("HTTP/1.1 400 Bad Request");
             this.sender.println("Content-Length: " + contentLength);
+            this.sender.println("");
+            this.sender.println(body);
+            this.sender.flush();
+    }
+
+    private void sendOKResponse(String body){
+
+            byte[] responseBuffer = body.getBytes();
+            int contentLength = responseBuffer.length;
+
+            this.sender.println("HTTP/1.1 200 OK");
+            this.sender.println("Content-Length: " + contentLength);
+       //     this.sender.println("Set-Cookie: sessionId=fredrik");
             this.sender.println("");
             this.sender.println(body);
             this.sender.flush();

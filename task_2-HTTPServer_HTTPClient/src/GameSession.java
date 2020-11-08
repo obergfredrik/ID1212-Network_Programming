@@ -30,7 +30,6 @@ public class GameSession implements Runnable{
 
             HTTPHandler httpHandler = new HTTPHandler(this.sender);
             StringBuilder stringBuilder = new StringBuilder();
-            HTMLHandler html = new HTMLHandler();
             int contentLength;
             int guessValue;
 
@@ -39,11 +38,11 @@ public class GameSession implements Runnable{
 
             String line = this.receiver.readLine();
 
-            if (httpHandler.validateGETRequest(line)) {
-                    httpHandler.sendOKResponse(html.getInitialHTML());
+            if (httpHandler.validateRequest(line)) {
+                    httpHandler.sendInitialResponse();
                 }
                 else {
-                    httpHandler.sendBadRequestResponse(html.getBadRequestHtml());
+                    httpHandler.sendBadRequestResponse();
                     this.socket.close();
                 }
 
@@ -56,7 +55,7 @@ public class GameSession implements Runnable{
                 System.out.println(line);
 
                 if(!httpHandler.validatePOSTRequest(line)) {
-                    httpHandler.sendBadRequestResponse(html.getBadRequestHtml());
+                    httpHandler.sendBadRequestResponse();
                     break;
                 }
 
@@ -81,18 +80,18 @@ public class GameSession implements Runnable{
                         this.guesses++;
 
                         if(guessValue == this.randomValue) {
-                            httpHandler.sendGuessResponse(html.correctAnswer(this.guesses));
+                            httpHandler.sendCorrectGuessResponse(this.guesses);
                             this.socket.close();
                             break;
                         }
                         else if (guessValue > this.randomValue)
-                             httpHandler.sendGuessResponse(html.highAnswer(this.guesses));
+                             httpHandler.sendHighGuessResponse(this.guesses);
                         else
-                            httpHandler.sendGuessResponse(html.lowAnswer(this.guesses));
+                            httpHandler.sendLowGuessResponse(this.guesses);
 
                    }catch (NumberFormatException e){
 
-                       httpHandler.sendGuessResponse(html.incorrectInput(this.guesses));
+                       httpHandler.sendIncorrectInputResponse(this.guesses);
 
                    }
 
