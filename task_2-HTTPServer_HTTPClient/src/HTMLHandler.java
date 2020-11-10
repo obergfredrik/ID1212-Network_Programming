@@ -12,9 +12,9 @@ public class HTMLHandler {
                 "            <h3>\n" +
                 "                You have made it in " + guesses + " guess(es). Press button to try again\n" +
                 "            </h3>\n" +
-                "            <button type=\"button\">" +
-                "                New Game" +
-                "            </button>" +
+                "<form method=\"GET\" action=\"http://localhost:1234\">" +
+                "            <input type=\"submit\" value=\"New Game\"/>" +
+                "</form>" +
                 "        </body>\n" +
                 "</html>";
 

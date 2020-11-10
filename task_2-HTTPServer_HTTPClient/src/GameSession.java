@@ -7,14 +7,14 @@ public class GameSession implements Runnable{
     private final Socket socket;
     private BufferedReader receiver;
     private PrintWriter sender;
+    private final Random random;
     private int guesses = 0;
     private int randomValue;
+    private String lastGuess;
 
     public GameSession(Socket socket) {
         this.socket = socket;
-        Random random = new Random();
-        this.randomValue = random.nextInt(101);
-        System.out.println("The generated number is: " + this.randomValue);
+        this.random = new Random();
 
         try {
             InputStream inputStream = this.socket.getInputStream();
@@ -28,81 +28,94 @@ public class GameSession implements Runnable{
     @Override
     public void run() {
 
-            HTTPHandler httpHandler = new HTTPHandler(this.sender);
-            StringBuilder stringBuilder = new StringBuilder();
-            int contentLength;
-            int guessValue;
-
+            HTTPHandler httpHandler = new HTTPHandler(this.sender, this.receiver);
+            String[] session;
 
         try {
 
-            String line = this.receiver.readLine();
+                 switch (httpHandler.validateRequest()){
+                     case "GET":
+                         String cookie = httpHandler.getCookie();
+                         if(cookie.equals("noCookie"))
+                             httpHandler.sendInitialResponse(generateSession());
+                         else {
+                             session = extractSession(cookie);
 
-            if (httpHandler.validateRequest(line)) {
-                    httpHandler.sendInitialResponse();
-                }
-                else {
-                    httpHandler.sendBadRequestResponse();
-                    this.socket.close();
-                }
+                             if (session[2].equals("0"))
+                                 httpHandler.sendInitialResponse(cookie);
+                             else if (session[6].equals("HI"))
+                                 httpHandler.sendHighGuessResponse(Integer.parseInt(session[2]), cookie);
+                             else
+                                 httpHandler.sendLowGuessResponse(Integer.parseInt(session[2]), cookie);
+                         }
+                         break;
+                     case "POST":
+                         String[] postData = httpHandler.getPostData();
+                         String body = httpHandler.getPostBody(postData[0]);
+                         session = extractSession(postData[1]);
+                         this.guesses = Integer.parseInt(session[2]) + 1;
+                         this.randomValue = Integer.parseInt(session[4]);
+                         this.lastGuess = session[6];
+                         int guessValue = extractGuessValue(body);
 
-            while (!this.receiver.readLine().equals("")){}
+                         if (guessValue == this.randomValue)
+                             httpHandler.sendCorrectGuessResponse(this.guesses, generateSession());
+                         else if (guessValue > this.randomValue)
+                             httpHandler.sendHighGuessResponse(this.guesses, "SessionId=guesses=" + this.guesses + "&random=" + this.randomValue + "&lastGuess=HI");
+                         else
+                             httpHandler.sendLowGuessResponse(this.guesses, "SessionId=guesses=" + this.guesses + "&random=" + this.randomValue + "&lastGuess=LO");
+                         break;
+                     case "BAD_REQUEST":
+                         httpHandler.sendBadRequestResponse();
+                         closeSocket();
+                         break;
+             }
 
+            closeSocket();
 
-            while(true){
-
-                line = this.receiver.readLine();
-                System.out.println(line);
-
-                if(!httpHandler.validatePOSTRequest(line)) {
-                    httpHandler.sendBadRequestResponse();
-                    break;
-                }
-
-                while (!(line = this.receiver.readLine()).equals(""))
-                     stringBuilder.append(line).append("\n");
-
-
-                try {
-
-
-                    contentLength = httpHandler.getContentLength(stringBuilder.toString());
-
-                    if (-1 != contentLength) {
-                        stringBuilder.setLength(0);
-                        for (int i = 0; i < contentLength; i++)
-                            stringBuilder.append((char)this.receiver.read());
-                    }
-
-                   try {
-                        guessValue = httpHandler.extractGuessValue(stringBuilder.toString());
-
-                        this.guesses++;
-
-                        if(guessValue == this.randomValue) {
-                            httpHandler.sendCorrectGuessResponse(this.guesses);
-                            this.socket.close();
-                            break;
-                        }
-                        else if (guessValue > this.randomValue)
-                             httpHandler.sendHighGuessResponse(this.guesses);
-                        else
-                            httpHandler.sendLowGuessResponse(this.guesses);
-
-                   }catch (NumberFormatException e){
-
-                       httpHandler.sendIncorrectInputResponse(this.guesses);
-
-                   }
-
-                }catch (NoSuchFieldException e){
-                    System.out.println(e);
-                }
-            }
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            } catch (NoSuchFieldException | NumberFormatException e) {
+                e.printStackTrace();
+                httpHandler.sendIncorrectInputResponse(this.guesses - 1,"SessionId=guesses="+ (this.guesses  - 1) + "&random=" + this.randomValue + "&lastGuess=" + this.lastGuess);
+                closeSocket();
+        }
 
 
+    }
+
+    String generateSession(){
+        return "SessionId=guesses=0&random=" + this.random.nextInt(101) + "&lastGuess=NA";
+    }
+
+    String[] extractSession(String cookie){
+        System.out.println(cookie);
+        return cookie.split("[=&]+");
+    }
+
+    int extractGuessValue(String guess) throws NoSuchFieldException{
+        try {
+            String[] value = guess.split("=");
+
+            if (2 != value.length)
+                throw new NoSuchFieldException();
+
+            int guessValue = Integer.parseInt(value[1]);
+
+            if (guessValue < 0 || guessValue > 100)
+                throw new NumberFormatException();
+
+            return guessValue;
+        }catch (NumberFormatException e){
+            throw new NumberFormatException();
+        }
+    }
+
+    private void closeSocket(){
+        try {
+            this.socket.close();
+        }catch (IOException ex){
+            ex.printStackTrace();
+        }
     }
 }
