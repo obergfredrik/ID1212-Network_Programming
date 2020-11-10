@@ -1,5 +1,20 @@
+/**
+ * Author: Fredrik Öberg
+ * Date of Creation: 201110
+ * Date of Latest Update: -
+ *
+ */
+
+/**
+ * Contains HTML code used in a game session.
+ */
 public class HTMLHandler {
 
+    /**
+     * Contains HTML code for when a correct guess has been made by the client.
+     * @param guesses is the number of guesses made upon this point.
+     * @return is the fully prepared HTML code in the form of a String.
+     */
     String getCorrectAnswer(int guesses){
 
         String correct =       "<html>\n" +
@@ -12,15 +27,20 @@ public class HTMLHandler {
                 "            <h3>\n" +
                 "                You have made it in " + guesses + " guess(es). Press button to try again\n" +
                 "            </h3>\n" +
-                "<form method=\"GET\" action=\"http://localhost:1234\">" +
-                "            <input type=\"submit\" value=\"New Game\"/>" +
-                "</form>" +
+                "             <form method=\"GET\" action=\"http://localhost:1234\">" +
+                "               <input type=\"submit\" value=\"New Game\"/>" +
+                "              </form>" +
                 "        </body>\n" +
                 "</html>";
 
         return correct;
     }
 
+    /**
+     * Contains HTML code for when a high guess has been made by the client.
+     * @param guesses is the number of guesses made upon this point.
+     * @return is the fully prepared HTML code in the form of a String.
+     */
    String getHighAnswer(int guesses){
 
             String high = "<html>\n" +
@@ -46,6 +66,11 @@ public class HTMLHandler {
 
    }
 
+    /**
+     * Contains HTML code for when a low guess has been made by the client.
+     * @param guesses is the number of guesses made upon this point.
+     * @return is the fully prepared HTML code in the form of a String.
+     */
    String getLowAnswer(int guesses){
 
        String low = "<html>\n" +
@@ -70,6 +95,11 @@ public class HTMLHandler {
        return low;
    }
 
+    /**
+     * Contains HTML code for when an incorrect input has been made by the client.
+     * @param guesses is the number of guesses made upon this point.
+     * @return is the fully prepared HTML code in the form of a String.
+     */
    String getIncorrectInput(int guesses){
 
        String low = "<html>\n" +
@@ -98,6 +128,10 @@ public class HTMLHandler {
 
    }
 
+    /**
+     * Contains HTML code for when an initial request without a session cookie has been made by the client.
+     * @return is the fully prepared HTML code in the form of a String.
+     */
     String getInitialHTML(){
 
         String initial = "<html>\n" +
@@ -124,6 +158,11 @@ public class HTMLHandler {
         return initial;
     }
 
+    /**
+     * Contains HTML code for when an bad request has been made by the client. Normally
+     * when a URL the server does not support has been request via the clients web browser.
+     * @return is the fully prepared HTML code in the form of a String.
+     */
     String getBadRequestHtml(){
 
         String html =

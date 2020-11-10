@@ -1,7 +1,18 @@
+/**
+ * Author: Fredrik Öberg
+ * Date of Creation: 201110
+ * Date of Latest Update: -
+ *
+ */
+
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Random;
 
+/**
+ * Contains the code handling the current game session. Implements the runnable interface for multi-threading functionality.
+ */
 public class GameSession implements Runnable{
 
     private final Socket socket;
@@ -12,6 +23,10 @@ public class GameSession implements Runnable{
     private int randomValue;
     private String lastGuess;
 
+    /**
+     * A GameSession constructor.
+     * @param socket is the socket receiving a TCP stream of data for the game session.
+     */
     public GameSession(Socket socket) {
         this.socket = socket;
         this.random = new Random();
@@ -25,45 +40,48 @@ public class GameSession implements Runnable{
         }
     }
 
+    /**
+     * Is initiated when a connection has been made from a client to the server and the start function of the
+     * current thread has been called upon. Handles the logic of a game session.
+     */
     @Override
     public void run() {
 
             HTTPHandler httpHandler = new HTTPHandler(this.sender, this.receiver);
-            String[] session;
+            String[] sessionData;
 
         try {
-
                  switch (httpHandler.validateRequest()){
                      case "GET":
-                         String cookie = httpHandler.getCookie();
-                         if(cookie.equals("noCookie"))
-                             httpHandler.sendInitialResponse(generateSession());
+                         String sessionCookie = httpHandler.getGETHeader();
+                         if(sessionCookie.equals("noCookie:"))
+                             httpHandler.sendInitialResponse(generateSession(0, generateRandomNumber(), "NA"));
                          else {
-                             session = extractSession(cookie);
+                             sessionData = extractSessionData(sessionCookie);
 
-                             if (session[2].equals("0"))
-                                 httpHandler.sendInitialResponse(cookie);
-                             else if (session[6].equals("HI"))
-                                 httpHandler.sendHighGuessResponse(Integer.parseInt(session[2]), cookie);
-                             else
-                                 httpHandler.sendLowGuessResponse(Integer.parseInt(session[2]), cookie);
+                             if (sessionData[2].equals("0"))
+                                 httpHandler.sendInitialResponse(sessionCookie);
+                             else if (sessionData[6].equals("HI"))
+                                 httpHandler.sendHighGuessResponse(Integer.parseInt(sessionData[2]), sessionCookie);
+                             else if (sessionData[6].equals("LO"))
+                                 httpHandler.sendLowGuessResponse(Integer.parseInt(sessionData[2]), sessionCookie);
                          }
                          break;
                      case "POST":
                          String[] postData = httpHandler.getPostData();
                          String body = httpHandler.getPostBody(postData[0]);
-                         session = extractSession(postData[1]);
-                         this.guesses = Integer.parseInt(session[2]) + 1;
-                         this.randomValue = Integer.parseInt(session[4]);
-                         this.lastGuess = session[6];
+                         sessionData = extractSessionData(postData[1]);
+                         this.guesses = Integer.parseInt(sessionData[2]) + 1;
+                         this.randomValue = Integer.parseInt(sessionData[4]);
+                         this.lastGuess = sessionData[6];
                          int guessValue = extractGuessValue(body);
 
                          if (guessValue == this.randomValue)
-                             httpHandler.sendCorrectGuessResponse(this.guesses, generateSession());
+                             httpHandler.sendCorrectGuessResponse(this.guesses, generateSession(0, generateRandomNumber(),"NA"));
                          else if (guessValue > this.randomValue)
-                             httpHandler.sendHighGuessResponse(this.guesses, "SessionId=guesses=" + this.guesses + "&random=" + this.randomValue + "&lastGuess=HI");
+                             httpHandler.sendHighGuessResponse(this.guesses, generateSession( this.guesses ,this.randomValue ,"HI"));
                          else
-                             httpHandler.sendLowGuessResponse(this.guesses, "SessionId=guesses=" + this.guesses + "&random=" + this.randomValue + "&lastGuess=LO");
+                             httpHandler.sendLowGuessResponse(this.guesses, generateSession(this.guesses ,this.randomValue, "LO"));
                          break;
                      case "BAD_REQUEST":
                          httpHandler.sendBadRequestResponse();
@@ -75,24 +93,41 @@ public class GameSession implements Runnable{
 
             } catch (IOException e) {
                 e.printStackTrace();
+                closeSocket();
             } catch (NoSuchFieldException | NumberFormatException e) {
                 e.printStackTrace();
-                httpHandler.sendIncorrectInputResponse(this.guesses - 1,"SessionId=guesses="+ (this.guesses  - 1) + "&random=" + this.randomValue + "&lastGuess=" + this.lastGuess);
+                httpHandler.sendIncorrectInputResponse(this.guesses - 1, generateSession(this.guesses  - 1, this.randomValue , this.lastGuess));
                 closeSocket();
         }
-
-
     }
 
-    String generateSession(){
-        return "SessionId=guesses=0&random=" + this.random.nextInt(101) + "&lastGuess=NA";
+    /**
+     * Generates a new game session stored in the form of a HTTP cookie sent via a TCP stream.
+     * @return is the game session in the form of a string.
+     */
+    String generateSession(int guesses, int randomValue, String lastGuess){
+        return "SessionId=guesses="+ guesses + "&random=" + randomValue + "&lastGuess=" +lastGuess;
     }
 
-    String[] extractSession(String cookie){
-        System.out.println(cookie);
+    private int generateRandomNumber(){
+        return this.random.nextInt(101);
+    }
+    /**
+     * Splits a cookie game session on specified markers to extract the game session data stored in the cookie.
+     * @param cookie if the cookie it raw untreated form.
+     * @return is the cookie game session split into an array of Strings
+     */
+    String[] extractSessionData(String cookie){
         return cookie.split("[=&]+");
     }
 
+    /**
+     * Extract the guess value stored in the clients POST request body.
+     * @param guess is the raw form of the POST body.
+     * @return is the extracted post body data in the form of a <String\> object.
+     * @throws NoSuchFieldException is thrown if the entered data in the POST request is
+     *         not a number between 0 and 100.
+     */
     int extractGuessValue(String guess) throws NoSuchFieldException{
         try {
             String[] value = guess.split("=");
@@ -111,6 +146,9 @@ public class GameSession implements Runnable{
         }
     }
 
+    /**
+     * Closes the socket of the current thread
+     */
     private void closeSocket(){
         try {
             this.socket.close();
