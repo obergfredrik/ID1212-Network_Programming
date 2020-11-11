@@ -63,7 +63,8 @@ public class GameSession implements Runnable{
                                  httpHandler.sendInitialResponse(sessionCookie);
                              else if (sessionData[6].equals("HI"))
                                  httpHandler.sendHighGuessResponse(Integer.parseInt(sessionData[2]), sessionCookie);
-                             else if (sessionData[6].equals("LO"))
+                             else
+
                                  httpHandler.sendLowGuessResponse(Integer.parseInt(sessionData[2]), sessionCookie);
                          }
                          break;
@@ -88,7 +89,6 @@ public class GameSession implements Runnable{
                          closeSocket();
                          break;
              }
-
             closeSocket();
 
             } catch (IOException e) {

@@ -99,6 +99,7 @@ public class HTTPHandler {
             while (!(header = this.receiver.readLine()).equals(""))
                 this.stringBuilder.append(header).append("\n");
 
+
             return this.stringBuilder.toString().split("[ \n]+");
 
         }catch (IOException e){
