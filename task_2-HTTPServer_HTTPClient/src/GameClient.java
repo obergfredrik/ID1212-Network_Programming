@@ -17,7 +17,7 @@ import java.util.*;
 public class GameClient {
 
     private String URL = "http://localhost:1234";
-    private final int SESSIONS = 500;
+    private final int SESSIONS = 100;
     private int high;
     private int low;
 
@@ -39,7 +39,8 @@ public class GameClient {
         for (int i = 0; i < this.SESSIONS; i++)
             total = total + guesses[i];
 
-        System.out.println("The average number of guesses was: " + (total/this.SESSIONS));
+        System.out.println("Number of game sessions created: " + this.SESSIONS);
+        System.out.println("The average number of guesses per session was: " + (total/this.SESSIONS));
     }
 
 
@@ -97,6 +98,7 @@ public class GameClient {
 
         return guesses;
     }
+    
 
     /**
      * Extracts the cookie from the HTTP response message received from the game server.
