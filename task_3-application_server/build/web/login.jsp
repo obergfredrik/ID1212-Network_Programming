@@ -1,3 +1,13 @@
+<!--/*
+* Author: Fredrik Öberg
+* Date of creation: 201118
+*
+*
+* The code represents the login page of the WebQuiz. It receives the parameter 
+* "response" if invalid login credentials has been entered.
+*
+*/-->
+
 <% String message = request.getParameter("response"); %>
 
 <html>
@@ -14,12 +24,12 @@
             <input name="password" type="text" value="Password"/>
             <input name="login" type="submit"  value="Log In"/>
         </form>
-        <% if(message != null){%>
-            <%=message%>
+        <% if (message != null) {%>
+        <%=message%>
         <%}%> 
         <h2>Register if you are a new user</h2>
         <form method="POST">
-             <input name="toregister" type="submit" value="Register"/>
+            <input name="toregister" type="submit" value="Register"/>
         </form>
     </body>
 </html>

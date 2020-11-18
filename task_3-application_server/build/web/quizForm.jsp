@@ -1,3 +1,12 @@
+<!--/*
+* Author: Fredrik �berg
+* Date of creation: 201118
+*
+* The code represents the form in the WebQuiz application. It receives the parameter "response" 
+* when the user has not checkad all the available answers. 
+*
+*/-->
+
 <% String message = request.getParameter("response"); %>
 
 <html>
@@ -7,7 +16,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-      
+
         <h2>The WebQuiz</h2>
         <form name="quizanswers" method="POST">
             Question 1
@@ -49,7 +58,7 @@
             Question 4
             <br>
             <br>
-             It's illegal in Texas to put what on your neighbour’s Cow?
+            It's illegal in Texas to put what on your neighbour’s Cow?
             <br>
             <input name="q4" type="radio"  value="a"/> T-Shirts
             <input name="q4" type="radio"  value="b"/> Grafitti
@@ -59,10 +68,10 @@
             <br>
             <br>
             <input name="submit" type="submit" value="Submit"/>
-            <% if(message != null){%>
+            <% if (message != null) {%>
             <%=message%>
             <%}%> 
         </form>
-      
+
     </body>
 </html>
