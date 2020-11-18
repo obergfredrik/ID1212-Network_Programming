@@ -1,2 +1,2 @@
 # Task 1 - Sockets
-The project is a simple chat application with a chat server and client. Developed in IntelliJ
+The project is a simple chat application with a chat server and client. Developed in IntelliJ Community IDE.
