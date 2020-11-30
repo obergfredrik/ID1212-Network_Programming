@@ -26,4 +26,4 @@ hs_err_pid*
 /application_server/nbproject/private/
 /application_server/build/
 
-Constants.java
+/task_4-encrypted_sockets/src/Constants.java
