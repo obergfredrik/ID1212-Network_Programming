@@ -63,10 +63,10 @@ public class MailSender {
             mailSender.sendMessage("AUTH LOGIN");
             mailSender.sendMessage(mailSender.encodeString(Constants.USERNAME.getBytes()));
             mailSender.sendMessage(mailSender.encodeString(Constants.PASSWORD.getBytes()));
-            mailSender.sendMessage("MAIL FROM:<fobe@kth.se>");
-            mailSender.sendMessage("RCPT TO:<fobe@kth.se>");
+            mailSender.sendMessage("MAIL FROM:" + Constants.MAIL);
+            mailSender.sendMessage("RCPT TO:" + Constants.MAIL);
             mailSender.sendMessage("DATA");
-            mailSender.sendMessage("I can watever i want. Mwahahahaha!\r\n.");
+            mailSender.sendMessage("I can sen watever i want. Mwahahahaha!\r\n.");
             mailSender.sendMessage("QUIT");
 
         }catch (IOException e){
