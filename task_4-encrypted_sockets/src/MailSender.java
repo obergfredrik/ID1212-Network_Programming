@@ -15,8 +15,6 @@ public class MailSender {
     private SSLSocket SSLsocket;
     private PrintWriter writer;
     private BufferedReader reader;
-    private StringBuilder stringBuilder;
-
 
     MailSender(){
         this.socketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
@@ -25,10 +23,22 @@ public class MailSender {
 
     void sendMessage(String message)throws IOException{
 
-        this.writer.println("HELO " + Constants.SMTP_HOST);
+        this.writer.println(message);
         this.writer.flush();
         System.out.println(this.reader.readLine());
 
+    }
+
+    void initiateTLSSession()throws IOException{
+
+        this.SSLsocket = (SSLSocket) this.socketFactory.createSocket( this.socket, this.socket.getInetAddress().getHostAddress(), this.socket.getPort(), true);
+        this.writer = new PrintWriter(this.SSLsocket.getOutputStream());
+        this.reader = new BufferedReader(new InputStreamReader(this.SSLsocket.getInputStream()));
+
+    }
+
+    String encodeString(byte[] message){
+        return Base64.getEncoder().encodeToString(message);
     }
 
     void initiateConnection()throws IOException {
@@ -38,66 +48,6 @@ public class MailSender {
         this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 
         System.out.println(this.reader.readLine());
-        this.writer.println("HELO " + Constants.SMTP_HOST);
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-        this.writer.println("STARTTLS");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.SSLsocket = (SSLSocket) this.socketFactory.createSocket( this.socket, this.socket.getInetAddress().getHostAddress(), this.socket.getPort(), true);
-        this.writer = new PrintWriter(this.SSLsocket.getOutputStream());
-        this.reader = new BufferedReader(new InputStreamReader(this.SSLsocket.getInputStream()));
-
-        this.writer.println("HELO " + Constants.SMTP_HOST);
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.writer.println("AUTH LOGIN");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        byte[] decodedBytes = Base64.getDecoder().decode("VXNlcm5hbWU6");
-        String decodedString = new String(decodedBytes);
-        System.out.println(decodedString);
-
-        String encodedString = Base64.getEncoder().encodeToString(Constants.USERNAME.getBytes());
-
-        this.writer.println(encodedString);
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        byte[] decodedBytes2 = Base64.getDecoder().decode("UGFzc3dvcmQ6");
-        String decodedString2 = new String(decodedBytes2);
-        System.out.println(decodedString2);
-
-        encodedString = Base64.getEncoder().encodeToString(Constants.PASSWORD.getBytes());
-
-        this.writer.println(encodedString);
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.writer.println("MAIL FROM:<fobe@kth.se>");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.writer.println("RCPT TO:<fobe@kth.se>");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.writer.println("DATA");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.writer.println("hej det här är jag från intellij");
-        this.writer.println(".");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
-        this.writer.println("QUIT");
-        this.writer.flush();
-        System.out.println(this.reader.readLine());
-
     }
 
     public static void main(String[] args){
@@ -106,10 +56,21 @@ public class MailSender {
 
         try {
             mailSender.initiateConnection();
+            mailSender.sendMessage("HELO " + Constants.SMTP_HOST);
+            mailSender.sendMessage("STARTTLS");
+            mailSender.initiateTLSSession();
+            mailSender.sendMessage("HELO " + Constants.SMTP_HOST);
+            mailSender.sendMessage("AUTH LOGIN");
+            mailSender.sendMessage(mailSender.encodeString(Constants.USERNAME.getBytes()));
+            mailSender.sendMessage(mailSender.encodeString(Constants.PASSWORD.getBytes()));
+            mailSender.sendMessage("MAIL FROM:<fobe@kth.se>");
+            mailSender.sendMessage("RCPT TO:<fobe@kth.se>");
+            mailSender.sendMessage("DATA");
+            mailSender.sendMessage("I can watever i want. Mwahahahaha!\r\n.");
+            mailSender.sendMessage("QUIT");
+
         }catch (IOException e){
             e.printStackTrace();
         }
-
     }
-
 }
