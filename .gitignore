@@ -25,3 +25,5 @@ hs_err_pid*
 /task_3-application_server/application_server/build/
 /application_server/nbproject/private/
 /application_server/build/
+
+Constants.java
