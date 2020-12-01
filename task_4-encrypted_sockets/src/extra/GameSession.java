@@ -1,12 +1,13 @@
 /**
  * Author: Fredrik Öberg
  * Date of Creation: 201110
- * Date of Latest Update: -
+ * Date of Latest Update: 201201
  *
  */
 
 package extra;
 
+import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.Socket;
 import java.util.Random;
@@ -17,7 +18,7 @@ import java.util.Random;
 
 public class GameSession implements Runnable{
 
-    private final Socket socket;
+    private final SSLSocket socket;
     private BufferedReader receiver;
     private PrintWriter sender;
     private final Random random;
@@ -29,7 +30,7 @@ public class GameSession implements Runnable{
      * A GameSession constructor.
      * @param socket is the socket receiving a TCP stream of data for the game session.
      */
-    public GameSession(Socket socket) {
+    public GameSession(SSLSocket socket) {
         this.socket = socket;
         this.random = new Random();
 

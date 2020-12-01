@@ -58,7 +58,7 @@
             Question 4
             <br>
             <br>
-            It's illegal in Texas to put what on your neighbour’s Cow?
+            It's illegal in Texas to put what on your neighbours Cow?
             <br>
             <input name="q4" type="radio"  value="a"/> T-Shirts
             <input name="q4" type="radio"  value="b"/> Grafitti
