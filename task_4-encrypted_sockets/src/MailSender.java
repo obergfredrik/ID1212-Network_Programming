@@ -66,7 +66,7 @@ public class MailSender {
             mailSender.sendMessage("MAIL FROM:" + Constants.MAIL);
             mailSender.sendMessage("RCPT TO:" + Constants.MAIL);
             mailSender.sendMessage("DATA");
-            mailSender.sendMessage("I can sen watever i want. Mwahahahaha!\r\n.");
+            mailSender.sendMessage("I can send whatever i want. Mwahahahaha!\r\n.");
             mailSender.sendMessage("QUIT");
 
         }catch (IOException e){
