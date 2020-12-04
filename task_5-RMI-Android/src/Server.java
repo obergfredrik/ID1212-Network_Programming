@@ -47,18 +47,17 @@ public class Server implements Hello {
     public Server() {}
 
     public String sayHello() {
-        return "Hello, world!";
+        return "Fredrik is in the house!";
     }
 
     public static void main(String args[]) {
 
         try {
             Server obj = new Server();
-           Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, 0);
+            Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, 0);
 
             // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.getRegistry();
-            String[] list = registry.list();
+            Registry registry = LocateRegistry.createRegistry(1234);
 
             registry.bind("Hello", stub);
 

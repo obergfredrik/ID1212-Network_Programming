@@ -27,3 +27,4 @@ hs_err_pid*
 /application_server/build/
 
 /task_4-encrypted_sockets/src/Constants.java
+/task_5-RMI-Android/src/Constants.java
