@@ -37,31 +37,73 @@
  */
 
 
+
+import com.sun.mail.imap.*;
+
+import java.io.IOException;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import javax.mail.*;
+import javax.mail.internet.MimeMessage;
+import java.util.Properties;
 
-public class Server implements Hello {
+public class Server implements Mail {
 
     public Server() {}
 
-    public String sayHello() {
+    public String fetchMail() {
         return "Fredrik is in the house!";
     }
 
-    public static void main(String args[]) {
+    private void initiateConnection() throws MessagingException, IOException {
+
+        Properties properties = new Properties();
+        properties.put("mail.store.protocol", "imap");
+        properties.setProperty("mail.imap.host", Constants.IMAP_HOST);
+        properties.put("mail.imap.port", "993");
+        properties.setProperty("mail.debug", "true");
+        properties.put("mail.imap.ssl.enable", "true");
+        Session emailSession = Session.getDefaultInstance(properties, null);
+
+        Store store = emailSession.getStore("imap");
+        store.connect(Constants.IMAP_HOST,Constants.IMAP_PORT, Constants.USERNAME, Constants.PASSWORD);
+        IMAPStore imapStore = (IMAPStore) store;
+        IMAPFolder inbox = (IMAPFolder) imapStore.getFolder("INBOX");
+        inbox.open(Folder.READ_ONLY);
+
+
+        Message[] messages = inbox.getMessages();
+        Message message = messages[messages.length - 1];
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n");
+        stringBuilder.append("From:" + message.getFrom()[0] + "\n");
+        stringBuilder.append("Subject: " + message.getSubject() + "\n");
+        stringBuilder.append("Content: " + message.getContent().toString() + "\n");
+
+        System.out.println(stringBuilder);
+
+
+
+
+    }
+
+    public static void main(String[] args) {
 
         try {
-            Server obj = new Server();
-            Hello stub = (Hello) UnicastRemoteObject.exportObject(obj, 0);
+            Server server = new Server();
 
-            // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.createRegistry(1234);
+            server.initiateConnection();
 
-            registry.bind("Hello", stub);
-
-            System.err.println("Server ready");
+//            Mail stub = (Mail) UnicastRemoteObject.exportObject(obj, 0);
+//
+//            // Bind the remote object's stub in the registry
+//            Registry registry = LocateRegistry.createRegistry(1234);
+//
+//            registry.bind("Mail", stub);
+//
+//            System.err.println("Server ready");
         } catch (Exception e) {
             System.err.println("Server exception: " + e.toString());
             e.printStackTrace();

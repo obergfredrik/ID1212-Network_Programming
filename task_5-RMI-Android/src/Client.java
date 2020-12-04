@@ -45,11 +45,10 @@ public class Client {
 
     public static void main(String[] args) {
 
-        String host = (args.length < 1) ? null : args[0];
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 1234);
-            Hello stub = (Hello) registry.lookup("Hello");
-            String response = stub.sayHello();
+            Mail stub = (Mail) registry.lookup("Mail");
+            String response = stub.fetchMail();
             System.out.println("response: " + response);
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
