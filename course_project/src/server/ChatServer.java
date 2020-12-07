@@ -9,8 +9,6 @@ import javax.net.ssl.*;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents a chat server which users can connect to and send messages between other connected users.
@@ -19,13 +17,13 @@ import java.util.List;
 public class ChatServer {
 
     private final SSLServerSocketFactory socketFactory;
-    private List<ChatRoom> chatRooms;
-    private List<ChatMember> chatMembers;
-    private List<Thread> memberThreads;
+    private ChatHandler chatHandler;
+
 
     ChatServer() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, CertificateException, NoSuchProviderException, IOException {
 
         char[] password = "rootroot".toCharArray();
+        this.chatHandler = new ChatHandler();
 
         KeyStore keyStore = createKeyStore(password);
         SSLContext context = createContext(keyStore, password);
@@ -55,24 +53,18 @@ public class ChatServer {
      * Is called upon when a chat server is being created.
      * @param portNumber is the port number of the created chat server.
      */
-    private void createServer(int portNumber) {
-
-        this.chatMembers = new ArrayList<>();
-        this.memberThreads = new ArrayList<>();
+    private void initiateServer(int portNumber) {
 
         try {
             SSLServerSocket serverSocket = (SSLServerSocket) this.socketFactory.createServerSocket(portNumber);
             System.out.println("The server has been created");
 
             SSLSocket socket;
+
             do {
                 socket = (SSLSocket) serverSocket.accept();
-                ChatMember member = new ChatMember(socket, this);
-                Thread thread = new Thread(member);
-                thread.start();
-                this.chatMembers.add(member);
-                this.memberThreads.add(thread);
-                System.out.println("Number of connected users: " + this.chatMembers.size());
+                this.chatHandler.newUser(socket);
+
             }while(true);
 
         } catch (IOException e) {
@@ -81,44 +73,22 @@ public class ChatServer {
     }
 
     /**
-     * Distributes the entered chat messages between all other connected users.
-     * @param message is the message being distributed.
-     */
-    void distributeMessage(String message){
-        for (ChatMember member: this.chatMembers)
-            member.sendMessage(message);
-    }
-
-    /**
-     * Removes a user and its associated thread from the chatMembers and threads lists.
-     * @param member is the chat member being removed
-     */
-    void removeUser(ChatMember member){
-        for (int i = 0; i < this.chatMembers.size(); i++){
-            if(this.chatMembers.get(i).equals(member)){
-                this.chatMembers.remove(i);
-                this.memberThreads.remove(i);
-            }
-        }
-        distributeMessage(member.getUserName() + " has left the chat!");
-        System.out.println("Number of connected users: " + this.chatMembers.size());
-    }
-
-    /**
-     * Callud upon when the program is executed.
+     * Called upon when the program is executed.
+     *
      * @param args contains the arguments sent via the command line.
      */
     public static void main(String[] args) {
 
-            int portNumber;
+        int portNumber;
 
-            if (0 < args.length) {
-                portNumber = Integer.parseInt(args[0]);
+        if (0 < args.length) {
+            portNumber = Integer.parseInt(args[0]);
 
-                if (0 > portNumber || 65535 < portNumber)
-                    throw new NumberFormatException();
-            } else
-                portNumber = 1234;
+            if (0 > portNumber || 65535 < portNumber)
+                throw new NumberFormatException();
+
+        } else
+            portNumber = 1234;
 
         ChatServer chatServer = null;
 
@@ -128,6 +98,6 @@ public class ChatServer {
             e.printStackTrace();
         }
 
-        chatServer.createServer(portNumber);
+        chatServer.initiateServer(portNumber);
     }
 }

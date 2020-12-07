@@ -41,7 +41,7 @@ import java.io.*;
             while (true) {
                 message = reader.readLine();
 
-                if(null == message)
+                if(null == message )
                     break;
                 else
                     System.out.println(message);

@@ -1,4 +1,6 @@
-package server; /**
+package server;
+
+/**
  *  Created by: Fredrik Öberg
  *  Date of creation: 201101
  *  Latest update: -
@@ -12,28 +14,25 @@ import java.io.*;
  * Represents a member of the chat server. Implements runnable and
  * therefore has its own associated thread.
  */
-public class ChatMember implements Runnable {
+public class ChatUser implements Runnable {
 
     private final SSLSocket socket;
-    private final ChatServer server;
+    private ChatRoom chatRoom;
     private String userName;
     private PrintWriter sender;
-    private BufferedReader reader;
+    private BufferedReader receiver;
 
     /**
      * Creates a ChatMember object
      *
      * @param socket is the socket of the ChatServer object.
-     * @param server is the server which has created and initiated
-     *               the ChatMember object.
      */
-    ChatMember(SSLSocket socket, ChatServer server) {
+    ChatUser(SSLSocket socket) {
         this.socket = socket;
-        this.server = server;
 
         try{
             InputStream input = this.socket.getInputStream();
-            this.reader = new BufferedReader(new InputStreamReader(input));
+            this.receiver = new BufferedReader(new InputStreamReader(input));
             this.sender = new PrintWriter(this.socket.getOutputStream(), true);
 
         }catch (IOException e){
@@ -50,22 +49,20 @@ public class ChatMember implements Runnable {
      */
     public void run() {
         try {
-            this.sender.println("Hello! Please enter your user name: ");
 
-            userName = this.reader.readLine();
 
-            this.server.distributeMessage(userName + " has entered the chat!");
+            this.chatRoom.distributeMessage(userName + " has entered " + this.chatRoom.getChatRoomName() + " !");
 
             String message;
 
             while (true) {
-                message = this.reader.readLine();
+                message = receiveMessage();
 
-                if(message.equals("quit")){
-                    this.server.removeUser(this);
+                if(message.equals("Bye!")){
+                    this.chatRoom.removeChatUser(this);
                     break;
                 }else
-                    this.server.distributeMessage("[" + this.userName + "] " + message);
+                    this.chatRoom.distributeMessage("[" + this.userName + "] " + message);
             }
 
             this.socket.close();
@@ -83,11 +80,26 @@ public class ChatMember implements Runnable {
         this.sender.println(message);
     }
 
+    String receiveMessage() throws IOException {
+        return this.receiver.readLine();
+    }
+
+    void setUserName(String userName){
+        this.userName = userName;
+    }
     /**
      * Returns the user name of the connected client.
      * @return is the connected clients user name.
      */
     String getUserName(){
         return this.userName;
+    }
+
+    public ChatRoom getChatRoom() {
+        return chatRoom;
+    }
+
+    public void setChatRoom(ChatRoom chatRoom) {
+        this.chatRoom = chatRoom;
     }
 }

@@ -44,7 +44,7 @@ public class MessageSender implements Runnable{
             do{
                 this.message = this.reader.readLine();
                 this.sender.println(message);
-            }while(!this.message.equals("quit"));
+            }while(!this.message.equals("*quit"));
         } catch (IOException ex) {
             System.out.println("Error getting input stream: " + ex.getMessage());
             ex.printStackTrace();
