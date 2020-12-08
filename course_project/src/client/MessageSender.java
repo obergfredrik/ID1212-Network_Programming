@@ -39,13 +39,20 @@ public class MessageSender implements Runnable{
             this.sender = new PrintWriter(this.socket.getOutputStream(), true);
             this.reader = new BufferedReader(new InputStreamReader((System.in)));
 
-            this.sender.println(this.reader.readLine());
+           // this.sender.println(this.reader.readLine());
+            this.sender.println("Fredrik");
+            this.sender.println("-create hej");
 
             do{
                 this.message = this.reader.readLine();
                 this.sender.println(message);
-            }while(!this.message.equals("*quit"));
-        } catch (IOException ex) {
+            }while(!this.message.equals("-quit"));
+
+            Thread.sleep(500);
+            this.socket.close();
+
+
+        } catch (IOException | InterruptedException ex) {
             System.out.println("Error getting input stream: " + ex.getMessage());
             ex.printStackTrace();
         }

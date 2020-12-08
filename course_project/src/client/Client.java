@@ -17,7 +17,7 @@ import java.security.cert.CertificateFactory;
  * Represents an instance of the chat client which connects to a chat server
  * where the user of the client can sen chat messages to other connected clients.
  */
-public class ChatClient {
+public class Client {
 
     private SSLSocket socket;
     private Thread sender;
@@ -25,7 +25,7 @@ public class ChatClient {
     private String hostName = "localhost";
     private int portNumber = 1234;
 
-    ChatClient() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    Client() throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
 
         File cert = new File("src/client/server.crt");Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(new FileInputStream(cert));
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -50,8 +50,8 @@ public class ChatClient {
 
         this.sender = new Thread(new MessageSender(this.socket));
         this.receiver = new Thread(new MessageReceiver(this.socket));
-        sender.start();
-        receiver.start();
+        this.sender.start();
+        this.receiver.start();
 
     }
 
@@ -60,10 +60,10 @@ public class ChatClient {
      * @param args is the entered parameters in the form of an array of strings.
      */
     public static void main( String[] args) {
-        ChatClient client = null;
+        Client client = null;
 
         try {
-            client = new ChatClient();
+            client = new Client();
         } catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e) {
             e.printStackTrace();
         }finally {

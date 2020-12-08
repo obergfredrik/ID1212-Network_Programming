@@ -14,13 +14,13 @@ import java.security.cert.CertificateException;
  * Represents a chat server which users can connect to and send messages between other connected users.
  *
  */
-public class ChatServer {
+public class Server {
 
     private final SSLServerSocketFactory socketFactory;
     private ChatHandler chatHandler;
 
 
-    ChatServer() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, CertificateException, NoSuchProviderException, IOException {
+    Server() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, CertificateException, NoSuchProviderException, IOException {
 
         char[] password = "rootroot".toCharArray();
         this.chatHandler = new ChatHandler();
@@ -90,14 +90,14 @@ public class ChatServer {
         } else
             portNumber = 1234;
 
-        ChatServer chatServer = null;
+        Server server = null;
 
         try {
-            chatServer = new ChatServer();
+            server = new Server();
         } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | CertificateException | NoSuchProviderException | IOException e) {
             e.printStackTrace();
         }
 
-        chatServer.initiateServer(portNumber);
+        server.initiateServer(portNumber);
     }
 }

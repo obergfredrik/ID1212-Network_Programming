@@ -14,21 +14,26 @@ import java.io.*;
  * Represents a member of the chat server. Implements runnable and
  * therefore has its own associated thread.
  */
-public class ChatUser implements Runnable {
+public class User implements Runnable {
 
     private final SSLSocket socket;
     private ChatRoom chatRoom;
     private String userName;
     private PrintWriter sender;
     private BufferedReader receiver;
+    private boolean connected;
+    private MessageHandler messageHandler;
 
     /**
      * Creates a ChatMember object
      *
      * @param socket is the socket of the ChatServer object.
      */
-    ChatUser(SSLSocket socket) {
+    User(SSLSocket socket, MessageHandler messageHandler) {
         this.socket = socket;
+        this.messageHandler = messageHandler;
+        this.connected = true;
+        this.userName = "anonymous";
 
         try{
             InputStream input = this.socket.getInputStream();
@@ -48,28 +53,44 @@ public class ChatUser implements Runnable {
      * thereby closing the connection and removing the user from the server.
      */
     public void run() {
+        String message;
+
+        sendMessage("Welcome to the chat! Please enter your user name: ");
+
         try {
 
+            createUserName();
+            sendMessage("Hi " + getUserName() + "! You are currently in the chat lobby.\nType -help if you need help to get started");
 
-            this.chatRoom.distributeMessage(userName + " has entered " + this.chatRoom.getChatRoomName() + " !");
-
-            String message;
-
-            while (true) {
-                message = receiveMessage();
-
-                if(message.equals("Bye!")){
-                    this.chatRoom.removeChatUser(this);
-                    break;
-                }else
-                    this.chatRoom.distributeMessage("[" + this.userName + "] " + message);
-            }
+            do{
+             message = this.receiver.readLine();
+             this.messageHandler.handleMessage(message, this);
+            }while (this.connected);
 
             this.socket.close();
-
         }catch (IllegalArgumentException | IOException e){
             System.out.println(e);
         }
+    }
+
+
+    void createUserName() throws IOException {
+
+        boolean userNameCreated;
+
+        do {
+           userNameCreated = this.messageHandler.updateUserName(this, this.receiver.readLine());
+        }while (!userNameCreated);
+
+    }
+
+    void leaveChatRoom(){
+        this.chatRoom.removeUser(this);
+        setChatRoom(null);
+    }
+
+    void deConnect(){
+        this.connected = false;
     }
 
     /**
@@ -78,10 +99,6 @@ public class ChatUser implements Runnable {
      */
     void sendMessage(String message){
         this.sender.println(message);
-    }
-
-    String receiveMessage() throws IOException {
-        return this.receiver.readLine();
     }
 
     void setUserName(String userName){

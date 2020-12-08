@@ -5,29 +5,29 @@ import java.util.List;
 
 public class ChatRoom {
 
-    private List<ChatUser> roomUsers;
+    private List<User> users;
     private String chatRoomName;
 
     ChatRoom(String chatRoomName){
-        this.roomUsers = new ArrayList<>();
+        this.users = new ArrayList<>();
         setChatRoomName(chatRoomName);
     }
 
-    public void addUser(ChatUser user){
-        this.roomUsers.add(user);
+    public void addUser(User user){
+        this.users.add(user);
         user.setChatRoom(this);
     }
 
-    public void removeChatUser(ChatUser user){
+    public void removeUser(User user){
 
-        for (int i = 0; i < this.roomUsers.size(); i++) {
-            if (this.roomUsers.get(i).getUserName().equals(user.getUserName())) {
-                this.roomUsers.remove(i);
+        for (int i = 0; i < this.users.size(); i++) {
+            if (this.users.get(i).getUserName().equals(user.getUserName())) {
+                this.users.remove(i);
                 break;
             }
         }
 
-        distributeMessage(user.getUserName() + " has left the chat!");
+
     }
 
     public String getChatRoomName() {
@@ -39,13 +39,7 @@ public class ChatRoom {
     }
 
 
-    /**
-     * Distributes the entered chat messages between all other connected users.
-     * @param message is the message being distributed.
-     */
-    void distributeMessage(String message){
-        for (ChatUser member: this.roomUsers)
-            member.sendMessage(message);
+    public List<User> getUsers() {
+        return users;
     }
-
 }
