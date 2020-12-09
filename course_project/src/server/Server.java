@@ -17,13 +17,13 @@ import java.security.cert.CertificateException;
 public class Server {
 
     private final SSLServerSocketFactory socketFactory;
-    private ChatHandler chatHandler;
+    private Chat chat;
 
 
     Server() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, CertificateException, NoSuchProviderException, IOException {
 
         char[] password = "rootroot".toCharArray();
-        this.chatHandler = new ChatHandler();
+        this.chat = new Chat();
 
         KeyStore keyStore = createKeyStore(password);
         SSLContext context = createContext(keyStore, password);
@@ -63,7 +63,7 @@ public class Server {
 
             do {
                 socket = (SSLSocket) serverSocket.accept();
-                this.chatHandler.newUser(socket);
+                this.chat.newUser(socket);
 
             }while(true);
 

@@ -48,8 +48,8 @@ public class Client {
      */
     private void createClient(){
 
-        this.sender = new Thread(new MessageSender(this.socket));
-        this.receiver = new Thread(new MessageReceiver(this.socket));
+        this.sender = new Thread(new Sender(this.socket));
+        this.receiver = new Thread(new Receiver(this.socket));
         this.sender.start();
         this.receiver.start();
 

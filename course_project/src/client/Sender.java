@@ -13,7 +13,7 @@ import java.io.*;
  * Handles the sending of messages in the chat client. Implements runnable so
  * the class operates in its own thread.
  */
-public class MessageSender implements Runnable{
+public class Sender implements Runnable{
 
     private SSLSocket socket;
     private BufferedReader reader;
@@ -24,7 +24,7 @@ public class MessageSender implements Runnable{
      * Creates an instance of the MessageSender class.
      * @param socket is the socket through which messages are sent.
      */
-    public MessageSender(SSLSocket socket){
+    public Sender(SSLSocket socket){
         this.socket = socket;
     }
 
@@ -38,10 +38,6 @@ public class MessageSender implements Runnable{
         try {
             this.sender = new PrintWriter(this.socket.getOutputStream(), true);
             this.reader = new BufferedReader(new InputStreamReader((System.in)));
-
-           // this.sender.println(this.reader.readLine());
-            this.sender.println("Fredrik");
-            this.sender.println("-create hej");
 
             do{
                 this.message = this.reader.readLine();

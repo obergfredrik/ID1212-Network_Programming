@@ -3,12 +3,12 @@ package server;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatRoom {
+public class Room {
 
     private List<User> users;
     private String chatRoomName;
 
-    ChatRoom(String chatRoomName){
+    Room(String chatRoomName){
         this.users = new ArrayList<>();
         setChatRoomName(chatRoomName);
     }
@@ -18,7 +18,7 @@ public class ChatRoom {
         user.setChatRoom(this);
     }
 
-    public void removeUser(User user){
+    public void removeUser(User user) {
 
         for (int i = 0; i < this.users.size(); i++) {
             if (this.users.get(i).getUserName().equals(user.getUserName())) {
@@ -26,8 +26,10 @@ public class ChatRoom {
                 break;
             }
         }
+    }
 
-
+    int getPresentUsers(){
+        return users.size();
     }
 
     public String getChatRoomName() {
@@ -37,7 +39,6 @@ public class ChatRoom {
     public void setChatRoomName(String chatRoomName) {
         this.chatRoomName = chatRoomName;
     }
-
 
     public List<User> getUsers() {
         return users;

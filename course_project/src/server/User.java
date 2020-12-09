@@ -17,7 +17,7 @@ import java.io.*;
 public class User implements Runnable {
 
     private final SSLSocket socket;
-    private ChatRoom chatRoom;
+    private Room room;
     private String userName;
     private PrintWriter sender;
     private BufferedReader receiver;
@@ -33,7 +33,7 @@ public class User implements Runnable {
         this.socket = socket;
         this.messageHandler = messageHandler;
         this.connected = true;
-        this.userName = "anonymous";
+        this.userName = "";
 
         try{
             InputStream input = this.socket.getInputStream();
@@ -63,7 +63,7 @@ public class User implements Runnable {
             sendMessage("Hi " + getUserName() + "! You are currently in the chat lobby.\nType -help if you need help to get started");
 
             do{
-             message = this.receiver.readLine();
+             message = receiveMessage();
              this.messageHandler.handleMessage(message, this);
             }while (this.connected);
 
@@ -73,20 +73,22 @@ public class User implements Runnable {
         }
     }
 
-
-    void createUserName() throws IOException {
-
-        boolean userNameCreated;
-
-        do {
-           userNameCreated = this.messageHandler.updateUserName(this, this.receiver.readLine());
-        }while (!userNameCreated);
-
+    void createUserName(){
+        try {
+            messageHandler.handleMessage("-name " + receiveMessage(), this);
+        } catch (IOException e) {
+            e.printStackTrace();
+            sendMessage("Could not create new user name. Please try again.");
+            createUserName();
+        }
     }
 
-    void leaveChatRoom(){
-        this.chatRoom.removeUser(this);
-        setChatRoom(null);
+    private String receiveMessage() throws IOException {
+        return this.receiver.readLine();
+    }
+
+    boolean inChatRoom(){
+        return room != null;
     }
 
     void deConnect(){
@@ -112,11 +114,11 @@ public class User implements Runnable {
         return this.userName;
     }
 
-    public ChatRoom getChatRoom() {
-        return chatRoom;
+    public Room getChatRoom() {
+        return room;
     }
 
-    public void setChatRoom(ChatRoom chatRoom) {
-        this.chatRoom = chatRoom;
+    public void setChatRoom(Room room) {
+        this.room = room;
     }
 }

@@ -14,7 +14,7 @@ import java.io.*;
  * Handles the receiving of messages in the chat client. Implements runnable so t
  * he class operates in its own thread.
  */
- class MessageReceiver implements Runnable{
+ class Receiver implements Runnable{
 
     private SSLSocket socket;
 
@@ -22,7 +22,7 @@ import java.io.*;
      * Creates an instance if the MessageReceiver class.
      * @param socket is the socket from which messages are received.
      */
-    MessageReceiver(SSLSocket socket){
+    Receiver(SSLSocket socket){
         this.socket = socket;
     }
 
