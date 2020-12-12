@@ -53,5 +53,9 @@ public class QuizBean implements Serializable {
     int getQuizPoints() {
         return this.quizPoints;
     }
+    
+    int getQuizSize(){
+        return this.userAnswers.length;
+    }
 
 }

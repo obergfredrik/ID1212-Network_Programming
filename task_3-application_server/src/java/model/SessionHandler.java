@@ -15,6 +15,7 @@ public class SessionHandler {
 
     private UserHandler users;
     private QuizHandler quizHandler;
+    private QuestionHandler questionHandler;
 
     /**
      * A constructor.
@@ -24,6 +25,8 @@ public class SessionHandler {
     public SessionHandler(UserHandler users) {
         this.users = users;
         this.quizHandler = new QuizHandler();
+        this.questionHandler = new QuestionHandler();
+        this.quizHandler.updateQuiz(questionHandler.getQuestions());
     }
 
     /**
@@ -38,7 +41,7 @@ public class SessionHandler {
      * @return is the response being sent to the client and contains the
      * appropriate session data in the form of a String and is HTTP compatible.
      */
-    public String loginRequest(HttpServletRequest request, HttpSession session, String correct, String incorrect) {
+    public String loginRequest(HttpServletRequest request, HttpSession session, String correct, String incorrect, String admin) {
 
         UserBean user;
         String password;
@@ -46,7 +49,11 @@ public class SessionHandler {
         if ((user = this.users.getUser(request.getParameter("name"))) != null) {
             if ((password = user.getPassword()).equals(request.getParameter("password"))) {
                 session.setAttribute("user", user);
-                return correct + getUserSession(user);
+                
+                if(user.getName().equals("admin"))
+                    return admin;
+                else
+                    return correct + getUserSession(user);
             }
         }
 
@@ -62,7 +69,7 @@ public class SessionHandler {
      */
     public String getUserSession(UserBean user) {
         return "?quizzes=" + user.getQuizzes() + "&average=" + user.getAverage() + "&name=" + user.getName()
-                + "&answer=" + user.getLastQuizPoint();
+                + "&answer=" + user.getLastQuizPoint() + "&questions=" + user.getLastQuizSize();
     }
 
     /**
@@ -83,7 +90,7 @@ public class SessionHandler {
         if (this.quizHandler.handleQuiz(request, user)) {
             return correct + getUserSession(user);
         } else {
-            return incorrect + "?response=You have missed to check one or more answers!";
+            return incorrect + "?response=You have missed to check one or more answers!&quiz=" + this.quizHandler.getQuiz();
         }
 
     }
@@ -96,5 +103,20 @@ public class SessionHandler {
      */
     public void logoutRequest(HttpSession session) {
         session.removeAttribute("user");
+    }
+    
+    public String newQuestion(HttpServletRequest request){
+        
+       String response =  this.questionHandler.addQuestion(request);
+       
+       if(response.equals("Question was added to database!"))
+           this.quizHandler.updateQuiz(questionHandler.getQuestions());
+        
+       return "?response=" + response;
+            
+    }   
+
+    public String generateQuiz(){
+        return "?quiz=" + this.quizHandler.getQuiz();
     }
 }

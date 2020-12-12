@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import static java.util.Objects.isNull;
+
 
 /**
  * Logs in to a IMAP host and retrieves the first mail of the users inbox.
@@ -52,7 +54,7 @@ public class MailReceiver {
                 this.stringBuilder.append(line + "\n");
                 response = line.split(" ");
 
-            }while (!(response[0].equals(tag) && (response[1].equals("OK") || response[1].equals("BAD") || response[1].equals("NO") || response[1].equals("PREAUTH") || response[1].equals("BYE"))));
+            }while (response.length == 0 || !(response[0].equals(tag) && (response[1].equals("OK") || response[1].equals("BAD") || response[1].equals("NO") || response[1].equals("PREAUTH") || response[1].equals("BYE"))) );
 
             System.out.println(this.stringBuilder.toString());
         }
@@ -80,7 +82,7 @@ public class MailReceiver {
      */
     void getBody(String tag)throws IOException{
 
-            this.writer.println(tag + " fetch 2 body[text]\r\n");
+            this.writer.println(tag + " fetch 7 body[text]\r\n");
             this.writer.flush();
             getServerResponse(tag);
 
@@ -94,7 +96,7 @@ public class MailReceiver {
      */
     void selectInbox(String tag)throws IOException{
 
-            this.writer.println(tag + " select inbox\r\n");
+            this.writer.println(tag + " SELECT INBOX\r\n");
             this.writer.flush();
 
             getServerResponse(tag);

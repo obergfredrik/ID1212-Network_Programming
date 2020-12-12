@@ -7,6 +7,7 @@ package controller;
 
 import java.io.IOException;
 import javax.servlet.*;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 
 import model.SessionHandler;
@@ -18,6 +19,7 @@ import model.UserHandler;
  * application.
  *
  */
+@WebServlet(name = "WebQuizServlet", urlPatterns = {"/WebQuizServlet"})
 public class WebQuizServlet extends HttpServlet {
 
     private RequestDispatcher dispatcher;
@@ -42,7 +44,11 @@ public class WebQuizServlet extends HttpServlet {
         handleRequest(request);
 
         if (this.user != null) {
-            this.dispatcher = request.getRequestDispatcher("userPage.jsp" + this.sessionHandler.getUserSession(this.user));
+            
+            if(user.getName().equals("admin"))
+                this.dispatcher = request.getRequestDispatcher("admin.jsp");
+            else
+                this.dispatcher = request.getRequestDispatcher("userPage.jsp" + this.sessionHandler.getUserSession(this.user));
         } else {
             this.dispatcher = request.getRequestDispatcher("login.jsp");
         }
@@ -73,7 +79,7 @@ public class WebQuizServlet extends HttpServlet {
             } else if (request.getParameter("register") != null) {
                 this.dispatcher = request.getRequestDispatcher("register.jsp" + this.userHandler.addUser(request));
             } else if (request.getParameter("login") != null) {
-                this.dispatcher = request.getRequestDispatcher(this.sessionHandler.loginRequest(request, this.session, "userPage.jsp", "login.jsp"));
+                this.dispatcher = request.getRequestDispatcher(this.sessionHandler.loginRequest(request, this.session, "userPage.jsp", "login.jsp", "admin.jsp"));
             } else {
                 this.dispatcher = request.getRequestDispatcher("login.jsp");
             }
@@ -84,7 +90,9 @@ public class WebQuizServlet extends HttpServlet {
                 this.sessionHandler.logoutRequest(this.session);
                 this.dispatcher = request.getRequestDispatcher("login.jsp");
             } else if (request.getParameter("newquiz") != null) {
-                this.dispatcher = request.getRequestDispatcher("quizForm.jsp");
+                this.dispatcher = request.getRequestDispatcher("quizForm.jsp" + this.sessionHandler.generateQuiz());
+            } else if (request.getParameter("newquestion") != null) {
+                this.dispatcher = request.getRequestDispatcher("admin.jsp" + this.sessionHandler.newQuestion(request));    
             } else {
                 this.dispatcher = request
                         .getRequestDispatcher(this.sessionHandler.newQuizSubmit(request, this.session, "userPage.jsp", "quizForm.jsp"));

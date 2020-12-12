@@ -5,6 +5,7 @@
  */
 package model;
 
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -13,7 +14,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class QuizHandler {
 
-    private String[] correctAnswers = {"a", "b", "d", "b"};
+    private String[] correctAnswers;
+    private String quiz;
 
     /**
      * Handles the quiz answers entered with the help of some helper methods.
@@ -39,6 +41,24 @@ public class QuizHandler {
 
     }
 
+    void updateQuiz(List<Question> questions){
+            
+        correctAnswers = new String[questions.size()];
+        StringBuilder sb = new StringBuilder();    
+              
+            for(int i = 0; i < correctAnswers.length; i++){
+                correctAnswers[i] = questions.get(i).getCorrect();
+                sb.append("Question " + (i+1) + "<br><br>" + questions.get(i).getQuestion() + "<br>");
+                sb.append("<input name=\"q" + (i+1) + "\" type=\"radio\" value=\"a\"/>" + questions.get(i).getA());
+                sb.append("<input name=\"q" + (i+1) + "\" type=\"radio\" value=\"b\"/>" + questions.get(i).getB());
+                sb.append("<input name=\"q" + (i+1) + "\" type=\"radio\" value=\"c\"/>" + questions.get(i).getC());
+                sb.append("<input name=\"q" + (i+1) + "\" type=\"radio\" value=\"d\"/>" + questions.get(i).getD()); 
+                sb.append("<br><br><br>");                  
+            }
+             
+            this.quiz = sb.toString();            
+    }
+    
     /**
      * Sets the quiz point of the current quiz.
      *
@@ -92,4 +112,9 @@ public class QuizHandler {
 
         return true;
     }
+
+    public String getQuiz() {
+        return quiz;
+    }
+    
 }

@@ -20,6 +20,14 @@ public class UserHandler {
      */
     public UserHandler() {
         this.users = new ArrayList<UserBean>();
+        UserBean admin = new UserBean();
+        admin.setName("admin");
+        admin.setPassword("Password");
+        this.users.add(admin);
+        UserBean user = new UserBean();
+        user.setName("Name");
+        user.setPassword("Password");
+        this.users.add(user);
     }
 
     /**

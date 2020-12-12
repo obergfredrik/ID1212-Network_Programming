@@ -15,6 +15,7 @@
 <% String average = request.getParameter("average"); %>
 <% String answer = request.getParameter("answer"); %>
 <% String name = request.getParameter("name");%>
+<% String questions = request.getParameter("questions");%>
 
 <html>
     <head>
@@ -26,7 +27,7 @@
         <h1>Hello <%=name%></h1>
         <h2>You have taken <%=quizzes%> quiz(es)</h2>
         <%if (!quizzes.equals("0")) {%>
-        <h2>Your last quiz had <%=answer%> correct answers out of 4</h2>
+        <h2>Your last quiz had <%=answer%> correct answers out of <%=questions%></h2>
         <%}%>
         <h2>Your average correct answers are <%=average%></h2>
         <form method="POST" action="">

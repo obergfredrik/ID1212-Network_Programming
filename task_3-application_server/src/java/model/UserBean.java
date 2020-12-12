@@ -137,4 +137,12 @@ public class UserBean implements Serializable {
 
         this.average = total / (double) getQuizzes();
     }
+    
+    public int getLastQuizSize(){
+        
+        if(this.quizBeans.size() == 0)
+            return 0;
+        else
+            return this.quizBeans.get(this.quizBeans.size() - 1).getQuizSize();
+    }
 }
