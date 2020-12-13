@@ -1,7 +1,7 @@
 /*
  * Author: Fredrik Öberg
  * Date of creation: 201118
- *
+ * Updated: 201213
  */
 package model;
 
@@ -105,6 +105,12 @@ public class SessionHandler {
         session.removeAttribute("user");
     }
     
+    /**
+     * Called when the admin has enterd a new question to be stored i thhe database.
+     * 
+     * @param request is the POST request containing the question attributes.
+     * @return is the response to the admin if the question was added or not to the database.
+     */
     public String newQuestion(HttpServletRequest request){
         
        String response =  this.questionHandler.addQuestion(request);
@@ -116,6 +122,11 @@ public class SessionHandler {
             
     }   
 
+    /**
+     * Gets the latest version of the quiz from the quiz handler.
+     * 
+     * @return is the latest version of the quiz.
+     */
     public String generateQuiz(){
         return "?quiz=" + this.quizHandler.getQuiz();
     }

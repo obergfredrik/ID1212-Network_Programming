@@ -1,3 +1,12 @@
+<!--/*
+* Author: Fredrik Öberg
+* Date of creation: 201213
+*
+* The code represents the admin page of the WebQuiz. It takes input from the admin to create a new question 
+* for the quiz and store it in the database. Receives the parameter "response" if the question was added successfully or not.
+*
+*/-->
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 

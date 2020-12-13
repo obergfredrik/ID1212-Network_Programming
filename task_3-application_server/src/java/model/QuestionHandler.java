@@ -1,7 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Author: Fredrik Öberg
+ * Date of creation: 201213
+ *
  */
 package model;
 
@@ -15,15 +15,18 @@ import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- *
- * @author fredr
+ * Handles all question related procedures of the WebQuiz system.
  */
 public class QuestionHandler {
     
     private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory("task_3-application_serverPU");
     private final int submissionSize = 6;
     
-    
+    /**
+     * Connects to a SQL database and retreives the questions stored in it.
+     * 
+     * @return is the questions stored in the database in the form of a list.
+     */
      List<Question> getQuestions() {
         
     	EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
@@ -34,9 +37,7 @@ public class QuestionHandler {
     	List<Question> questions = null;
         
     	try {    		
-    		questions = tq.getResultList();
-                
-    		//questions.forEach(question->System.out.println(question.getQuestion() + " " + question.getCorrect()));
+    		questions = tq.getResultList();               
     	}
     	catch(NoResultException ex) {
     		ex.printStackTrace();
@@ -47,12 +48,18 @@ public class QuestionHandler {
     	}
     }
     
+     /**
+      * Sends a question added by the system admin to the connected database.
+      * 
+      * @param request is the POST request containing all the entered information concerning the new question.
+      * @return is true if the question could be added to the database. False if not.
+      */
      public String addQuestion(HttpServletRequest request){
          
         String[] attributes = extractQuestion(request);
         
         if(!checkQuestion(attributes))
-            return "You have missed to add one or more of the question attributes";
+            return "You have missed to add one or more of the question attributes or the length of the attribute is to long!";
         
         if(sendQuestionToDatabase(createQuestion(attributes)))                   
            return "Question was added to database!";
@@ -62,6 +69,12 @@ public class QuestionHandler {
         
     }
      
+     /**
+      * Creates a new question from the admin entered attributes.
+      * 
+      * @param attributes is the attributes of the new question in the form of an array of strings.
+      * @return is the created question object.
+      */
     private Question createQuestion(String[] attributes){
             
         Question question = new Question();
@@ -76,6 +89,12 @@ public class QuestionHandler {
         return question;
     } 
      
+    /**
+     * Sende the created question to the database.
+     * 
+     * @param question it the question being sent.
+     * @return is true if the question could be sent and stored. False if not.
+     */
     private boolean sendQuestionToDatabase(Question question){
     
         EntityManager entityManager = ENTITY_MANAGER_FACTORY.createEntityManager();       
@@ -100,6 +119,12 @@ public class QuestionHandler {
         }
     } 
     
+    /**
+     * Extracts the question attributes from the POST request sent by the admin.
+     * 
+     * @param request is the request containing the question attributes.
+     * @return is the attributes in teh form of an array of strings.
+     */
     private String[] extractQuestion(HttpServletRequest request){
     
         String[] values = new String[submissionSize];
@@ -114,10 +139,17 @@ public class QuestionHandler {
         return values;
     }
     
+    /**
+     * Checks to see if the extracted question attributes is empty of longer than 
+     * 255 characters which is the maximum size stored in the database.
+     * 
+     * @param question is the question attributes.
+     * @return is true if the attributes follows the established convention. False if not.
+     */
     private boolean checkQuestion(String[] question){
     
          for(int i = 0; i < submissionSize - 1; i++)
-             if(question[i].isEmpty())
+             if(question[i].isEmpty() || question[i].length() > 255)
                  return false;
          
          if(question[submissionSize - 1] == null)

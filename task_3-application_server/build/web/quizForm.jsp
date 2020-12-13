@@ -1,8 +1,9 @@
 <!--/*
 * Author: Fredrik Öberg
-* Date of creation: 201118
+* Date of creation: 201213
 *
-* The code represents the form in the WebQuiz application. It receives the parameter "response" 
+* The code represents the form in the WebQuiz application and is dynamically changed based on 
+* what questions are stored and retreived from the database. It receives the parameter "response" 
 * when the user has not checkad all the available answers. 
 *
 */-->

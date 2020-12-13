@@ -1,7 +1,7 @@
 /*
  * Author: Fredrik Öberg
  * Date of creation: 201118
- *
+ * Updated: 201213
  */
 package controller;
 

@@ -1,7 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Author: Fredrik Öberg
+ * Date of creation: 201213
+ *
  */
 package model;
 
@@ -17,8 +17,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
- *
- * @author fredr
+ * A question for the quiz containing the it id for the primary key in the database, the question attribute 
+ * as well as four different answerr choices and the correct choice. The class implements serializable so that in can
+ * use the Java Persistence API to persist the object in a database.
  */
 @Entity
 @Table(name = "question")
@@ -33,6 +34,9 @@ import javax.persistence.Table;
     @NamedQuery(name = "Question.findByQuestion", query = "SELECT q FROM Question q WHERE q.question = :question")})
 public class Question implements Serializable {
 
+    /**
+     * Class attributes.
+     */
     private static final long serialVersionUID = 1L;
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     @Basic(optional = false)
@@ -50,70 +54,154 @@ public class Question implements Serializable {
     private String d;
     @Column(name = "question")
     private String question;
-
+    
+    /**
+     * A constructor.
+     */
     public Question() {
     }
 
+    /**
+     * A constructor.
+     * 
+     * @param id is the primary ley attribute of the class. 
+     */
     public Question(Integer id) {
         this.id = id;
     }
 
+    /**
+     * A getter.
+     * 
+     * @return is the class id. 
+     */
     public Integer getId() {
         return id;
     }
 
+    /**
+     * An id setter.
+     * 
+     * @param id is the new id value. 
+     */
     public void setId(Integer id) {
         this.id = id;
     }
 
+    /**
+     * A getter for the attribute a.
+     * 
+     * @return is the value of the class attribute a. 
+     */
     public String getA() {
         return a;
     }
 
+    /**
+     * A setter for the class attribute a.
+     * 
+     * @param a is the new value of a.
+     */
     public void setA(String a) {
         this.a = a;
     }
 
+     /**
+     * A getter for the attribute b.
+     * 
+     * @return is the value of the class attribute b. 
+     */
     public String getB() {
         return b;
     }
 
+        /**
+     * A setter for the class attribute b.
+     * 
+     * @param a is the new value of b.
+     */
     public void setB(String b) {
         this.b = b;
     }
 
+     /**
+     * A getter for the attribute c.
+     * 
+     * @return is the value of the class attribute c. 
+     */
     public String getC() {
         return c;
     }
 
+        /**
+     * A setter for the class attribute c.
+     * 
+     * @param a is the new value of c.
+     */
     public void setC(String c) {
         this.c = c;
     }
 
+     /**
+     * A getter for the attribute correct.
+     * 
+     * @return is the value of the class attribute correct. 
+     */
     public String getCorrect() {
         return correct;
     }
 
+     /**
+     * A setter for the class attribute correct.
+     * 
+     * @param a is the new value of correct.
+     */
     public void setCorrect(String correct) {
         this.correct = correct;
     }
 
+     /**
+     * A getter for the attribute d.
+     * 
+     * @return is the value of the class attribute d. 
+     */
     public String getD() {
         return d;
     }
 
+    /**
+     * A setter for the class attribute d.
+     * 
+     * @param a is the new value of d.
+     */
     public void setD(String d) {
         this.d = d;
     }
 
+    
+     /**
+     * A getter for the attribute question.
+     * 
+     * @return is the value of the class attribute question. 
+     */
     public String getQuestion() {
         return question;
     }
 
+    /**
+     * A setter for the class attribute question.
+     * 
+     * @param a is the new value of question.
+     */
     public void setQuestion(String question) {
         this.question = question;
     }
 
+    /**
+     * Creates a hashcode for the primary key id.
+     * 
+     * @return is the hash value of the id attribute. 
+     */
     @Override
     public int hashCode() {
         int hash = 0;
@@ -121,9 +209,15 @@ public class Question implements Serializable {
         return hash;
     }
 
+    /**
+     * Checks if the class instance is equal to a given object.
+     * 
+     * @param object is the object being compared to the class instance.
+     * @return is true if the class instance and the object parameters are equal. False if not.
+     */
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+     
         if (!(object instanceof Question)) {
             return false;
         }
@@ -134,6 +228,11 @@ public class Question implements Serializable {
         return true;
     }
 
+    /**
+     * Creates a string of the class instance.
+     * 
+     * @return is the class instance in the form of a string. 
+     */
     @Override
     public String toString() {
         return "model.Question[ id=" + id + " ]";

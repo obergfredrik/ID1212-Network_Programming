@@ -1,7 +1,7 @@
 /*
  * Author: Fredrik Öberg
  * Date of creation: 201118
- *
+ * Updated: 201213
  */
 package model;
 
@@ -54,6 +54,11 @@ public class QuizBean implements Serializable {
         return this.quizPoints;
     }
     
+    /**
+     * Returns the number of questions this instance contains.
+     * 
+     * @return is the number of questions in the form of an int.
+     */
     int getQuizSize(){
         return this.userAnswers.length;
     }

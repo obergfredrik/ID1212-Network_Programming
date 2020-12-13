@@ -1,7 +1,7 @@
 /*
  * Author: Fredrik Öberg
  * Date of creation: 201118
- *
+ * Updated: 201213
  */
 package model;
 
@@ -41,6 +41,11 @@ public class QuizHandler {
 
     }
 
+    /**
+     * Creates a new based on the questions it receives.
+     * 
+     * @param questions is the questions the quiz i based on.
+     */
     void updateQuiz(List<Question> questions){
             
         correctAnswers = new String[questions.size()];
@@ -113,6 +118,11 @@ public class QuizHandler {
         return true;
     }
 
+    /**
+     * A getter for the quiz attribute.
+     * 
+     * @return is the latest created version of the quiz.
+     */
     public String getQuiz() {
         return quiz;
     }

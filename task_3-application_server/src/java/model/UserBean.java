@@ -1,7 +1,7 @@
 /*
  * Author: Fredrik Öberg
  * Date of creation: 201118
- *
+ * Updated: 201213
  */
 package model;
 
@@ -138,6 +138,11 @@ public class UserBean implements Serializable {
         this.average = total / (double) getQuizzes();
     }
     
+    /**
+     * A getter for the number of questions the latest entered quiz contains.
+     * .
+     * @return is the number of questions the latest entered quiz contains.
+     */
     public int getLastQuizSize(){
         
         if(this.quizBeans.size() == 0)

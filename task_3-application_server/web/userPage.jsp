@@ -1,6 +1,7 @@
 <!--/*
 * Author: Fredrik Öberg
 * Date of creation: 201118
+* Updated: 201213
 *
 * The code represents the users private page in the WebQuiz application 
 * and presents the data of the users interaction with the application. It 
