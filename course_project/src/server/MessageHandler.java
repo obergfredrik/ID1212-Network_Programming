@@ -1,5 +1,7 @@
 package server;
 
+import java.io.IOException;
+
 public class MessageHandler {
 
     private final Chat chat;
@@ -22,29 +24,41 @@ public class MessageHandler {
         String[] split = message.split(" ", 2);
 
         switch (commands.checkCommand(split[0])){
-            case "-help":
+            case "-h":
                 helpRequest(user);
                 break;
-            case "-join":
+            case "-j":
                 joinRequest(user, split);
                 break;
-            case "-create":
+            case "-c":
                 createRequest(user, split);
                 break;
-            case "-leave":
+            case "-l":
                 leaveRequest(user);
                 break;
-            case "-quit":
+            case "-q":
                 quitRequest(user);
                 break;
-            case "-rooms":
+            case "-r":
                 chatRoomsRequest(user);
                 break;
-            case "-location":
-                locationRequest(user);
+            case "-p":
+                positionRequest(user);
                 break;
-            case "-name":
+            case "-n":
                 nameRequest(user, split);
+                break;
+            case "-u":
+                usersRequest(user);
+                break;
+            case "-s":
+                sendFileRequest(user, message.split(" ", 4));
+                break;
+            case "-f":
+                sendUploadedFiles(user);
+                break;
+            case "-g":
+                getFileRequest(user, split);
                 break;
             case "noCommand":
                 if (user.inChatRoom())
@@ -52,6 +66,38 @@ public class MessageHandler {
                 else
                     user.sendMessage("An incorrect command was entered");
         }
+    }
+
+    private void getFileRequest(User user, String[] getRequest) {
+
+        if(user.inChatRoom()) {
+
+            if(user.isTransferring()) {
+
+                if(user.getChatRoom().hasFile(getRequest[1])) {
+                    try {
+                        user.sendFileToClient(user.getChatRoom().getChatFile(getRequest[1]));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                    user.sendMessage("There is no file called \"" + getRequest[1] + "\" in the chatroom");
+
+                user.setSending(false);
+            }else {
+
+                user.setSending(true);
+                user.sendMessage("Enter the name of the file you wish to download:");
+            }
+        }
+        else
+            user.sendMessage("You need to enter a chat room to download an uploaded file.");
+
+    }
+
+    private void sendUploadedFiles(User user) {
+        user.sendMessage(user.getChatRoom().getFileNames());
     }
 
 
@@ -96,7 +142,7 @@ public class MessageHandler {
         distributeMessage(user, messages.leaveMessage(user), commands.notToUser() );
     }
 
-    void locationRequest(User user){
+    void positionRequest(User user){
 
         if (user.getChatRoom() != null)
             user.sendMessage(messages.locationInformation(user));
@@ -113,8 +159,16 @@ public class MessageHandler {
             if (chat.checkUserName(nameCommand[1])) {
                 user.sendMessage(messages.occupiedUserName(nameCommand[1]));
                 user.createUserName();
-            } else
+            } else {
+
+                if (!user.getUserName().isEmpty())
+                    user.sendMessage(messages.userNameUpdated(nameCommand[1]));
+
+                if(user.inChatRoom())
+                    distributeMessage(user, messages.changedUsername(user.getUserName(), nameCommand[1]), commands.notToUser());
+
                 user.setUserName(nameCommand[1]);
+            }
         }else
             user.sendMessage(messages.emptyUsername());
     }
@@ -129,6 +183,13 @@ public class MessageHandler {
 
     }
 
+    void usersRequest(User user){
+
+        if(user.inChatRoom())
+            user.sendMessage(messages.listUsers(user));
+        else
+            user.sendMessage(messages.notInChatRoom());
+    }
 
     void distributeMessage(User user, String message, boolean toUser){
 
@@ -140,5 +201,38 @@ public class MessageHandler {
 
         if (toUser)
             user.sendMessage(message);
+    }
+
+
+
+
+
+    void sendFileRequest(User user, String[] sendRequest)  {
+
+        if(user.inChatRoom()) {
+
+            if(user.isTransferring()){
+
+                if (sendRequest[1].equals("size"))
+                    user.sendMessage(messages.toLarge());
+                else if (sendRequest[1].equals("file")) {
+                    user.sendMessage(messages.noFile(sendRequest[2]));
+                }else {
+                    try {
+                        user.receiveFileFromClient(sendRequest[1], Integer.parseInt(sendRequest[2]));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                user.setSending(false);
+            }else{
+                    user.setSending(true);
+                    user.sendMessage(messages.enterFileName());
+            }
+
+        }else
+            user.sendMessage(messages.notSendFile());
     }
 }

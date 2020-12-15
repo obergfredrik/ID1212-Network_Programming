@@ -14,6 +14,8 @@ public class Chat {
         this.messageHandler = new MessageHandler(this);
         this.users = new ArrayList<>();
         this.rooms = new ArrayList<>();
+        this.rooms.add(new Room("a"));
+        getChatRoom("a").addChatFile(new ChatFile("f", new byte[]{'a','b','c','\n','x','a','b','c', '\n'}));
     }
 
     void newUser(SSLSocket socket){

@@ -19,13 +19,15 @@ public class Sender implements Runnable{
     private BufferedReader reader;
     private PrintWriter sender;
     private String message;
-
+    private Client client;
+    private int MAX_FILE_SIZE = 1024*1024;
     /**
      * Creates an instance of the MessageSender class.
      * @param socket is the socket through which messages are sent.
      */
-    public Sender(SSLSocket socket){
+    public Sender(SSLSocket socket, Client client){
         this.socket = socket;
+        this.client = client;
     }
 
     /**
@@ -39,10 +41,22 @@ public class Sender implements Runnable{
             this.sender = new PrintWriter(this.socket.getOutputStream(), true);
             this.reader = new BufferedReader(new InputStreamReader((System.in)));
 
+            loggingIn();
+
+            this.sender.println("-j a");
+
             do{
                 this.message = this.reader.readLine();
+
                 this.sender.println(message);
-            }while(!this.message.equals("-quit"));
+
+
+                if(message.equals("-s"))
+                    sendFile();
+                else if(message.equals("-g"))
+                    receiveFile();
+
+            }while(!this.message.equals("-q"));
 
             Thread.sleep(500);
             this.socket.close();
@@ -53,4 +67,70 @@ public class Sender implements Runnable{
             ex.printStackTrace();
         }
     }
+
+    private void receiveFile() throws IOException {
+        client.setReceiving(true);
+
+        while (!client.isServerIsSending())
+            if (!client.isReceiving())
+                return;
+
+        String fileName = this.reader.readLine();
+        this.sender.println("-g " + fileName);
+    }
+
+    void loggingIn() throws IOException, InterruptedException {
+
+        do {
+
+           // this.message = this.reader.readLine();
+            this.sender.println("asdqwe");
+
+            Thread.sleep(100);
+
+        }while (!client.isLoggedIn());
+    }
+
+    void sendFile() throws IOException, InterruptedException {
+
+        client.setSending(true);
+
+        while (!client.isServerIsReceiving())
+            if (!client.isSending())
+                return;
+
+        String fileName = this.reader.readLine();
+
+        try {
+            String current = new java.io.File(".").getCanonicalPath();
+            File file = new File(current + "/" + fileName);
+
+            int size = (int)file.length();
+
+            if (MAX_FILE_SIZE < size) {
+                this.sender.println("-s size");
+                return;
+            }
+
+            this.sender.println("-s " + fileName + " " + size);
+
+            byte[] data = new byte[(int)file.length()];
+
+            FileInputStream fileInputStream = new FileInputStream(file);
+            OutputStream outputStream = socket.getOutputStream();
+
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+            bufferedInputStream.read(data,0,data.length);
+
+
+            outputStream.write(data,0,data.length);
+            outputStream.flush();
+
+        }catch (FileNotFoundException e){
+            this.sender.println("-s file " + fileName);
+        }
+
+        client.setSending(false);
+    }
+
 }

@@ -72,4 +72,48 @@ public class Messages {
         return "Bye " + user.getUserName() + "! Hope to see you back again soon.";
     }
 
+    String userNameUpdated(String username){
+        return "Your new username is " + username;
+    }
+
+    String changedUsername(String oldName, String newName){
+        return oldName + " has changed name to " + newName;
+    }
+
+    String listUsers(User user){
+
+        Room room = user.getChatRoom();
+        List<User> users = room.getUsers();
+
+        if (users.size() == 1)
+            return "You are alone in this chat room!";
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("The following users are in the chat room " + room.getChatRoomName() + ":\n");
+
+        for (User u: users)
+            stringBuilder.append(u.getUserName() + "\n");
+
+        return stringBuilder.toString();
+    }
+
+    String notInChatRoom(){
+        return "You are not in a chat room. Join a chat room to list the users in that room.";
+    }
+
+    String enterFileName(){
+        return "Enter the name of the file being sent:\n";
+    }
+
+    String notSendFile(){
+        return "You need to enter a chat room to send a file.";
+    }
+
+    String noFile(String fileName){
+        return "The exists no file with the name " + fileName;
+    }
+
+    String toLarge(){
+        return "The file you tried to send was to large";
+    }
 }

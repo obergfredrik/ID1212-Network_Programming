@@ -6,10 +6,12 @@ import java.util.List;
 public class Room {
 
     private List<User> users;
+    private List<ChatFile> files;
     private String chatRoomName;
 
     Room(String chatRoomName){
         this.users = new ArrayList<>();
+        this.files = new ArrayList<>();
         setChatRoomName(chatRoomName);
     }
 
@@ -26,6 +28,44 @@ public class Room {
                 break;
             }
         }
+    }
+
+    public void addChatFile(ChatFile file) {
+        this.files.add(file);
+    }
+
+    public boolean hasFile(String fileName){
+
+       if(!fileName.isEmpty())
+           for (ChatFile c: files)
+               if (c.getName().equals(fileName))
+                   return true;
+
+        return false;
+    }
+
+    public ChatFile getChatFile(String fileName){
+
+        for (ChatFile f:files)
+            if (f.getName().equals(fileName))
+                return f;
+
+        return null;
+    }
+
+    public String getFileNames(){
+
+        if (files.isEmpty())
+            return "There are no files uploaded to this chat room";
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("The chat room has the following files stored:\n");
+
+        for (ChatFile f: files)
+            stringBuilder.append(f.getName() + "\n");
+
+        return stringBuilder.toString();
     }
 
     int getPresentUsers(){

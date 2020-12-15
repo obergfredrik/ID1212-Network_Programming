@@ -23,6 +23,9 @@ public class User implements Runnable {
     private BufferedReader receiver;
     private boolean connected;
     private MessageHandler messageHandler;
+    private boolean loggedIn;
+    private boolean sending;
+    private boolean receiving;
 
     /**
      * Creates a ChatMember object
@@ -55,12 +58,13 @@ public class User implements Runnable {
     public void run() {
         String message;
 
-        sendMessage("Welcome to the chat! Please enter your user name: ");
+        sendMessage("Hi and welcome to the chat! Please enter your user name: ");
 
         try {
 
             createUserName();
-            sendMessage("Hi " + getUserName() + "! You are currently in the chat lobby.\nType -help if you need help to get started");
+            sendMessage("Hi " + getUserName() + "! You are currently in the chat lobby.\nType -h if you need help to get started");
+            setLoggedIn(true);
 
             do{
              message = receiveMessage();
@@ -75,7 +79,7 @@ public class User implements Runnable {
 
     void createUserName(){
         try {
-            messageHandler.handleMessage("-name " + receiveMessage(), this);
+            messageHandler.handleMessage("-n " + receiveMessage(), this);
         } catch (IOException e) {
             e.printStackTrace();
             sendMessage("Could not create new user name. Please try again.");
@@ -120,5 +124,53 @@ public class User implements Runnable {
 
     public void setChatRoom(Room room) {
         this.room = room;
+    }
+
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
+
+    public void setLoggedIn(boolean loggedIn) {
+        this.loggedIn = loggedIn;
+    }
+
+    public boolean isTransferring() {
+        return sending;
+    }
+
+    public void setSending(boolean sending) {
+        this.sending = sending;
+    }
+
+    public boolean isReceiving() {
+        return receiving;
+    }
+
+    public void setReceiving(boolean receiving) {
+        this.receiving = receiving;
+    }
+
+    public void receiveFileFromClient(String fileName, int size) throws IOException {
+
+        InputStream inputStream = this.socket.getInputStream();
+        byte[] data = new byte[size];
+        inputStream.read(data, 0, data.length);
+        ChatFile file = new ChatFile(fileName, data);
+        getChatRoom().addChatFile(file);
+        sendMessage("File uploaded correctly");
+    }
+
+    public void sendFileToClient(ChatFile chatFile) throws IOException {
+
+
+
+        byte[] data = chatFile.getData();
+
+        sendMessage("file " + chatFile.getName() + " " + data.length);
+
+        OutputStream outputStream = socket.getOutputStream();
+
+        outputStream.write(data,0,data.length);
+        outputStream.flush();
     }
 }

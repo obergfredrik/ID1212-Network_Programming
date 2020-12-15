@@ -17,13 +17,17 @@ import java.io.*;
  class Receiver implements Runnable{
 
     private SSLSocket socket;
+    private Client client;
+    private String message;
+    private BufferedReader reader;
 
     /**
      * Creates an instance if the MessageReceiver class.
      * @param socket is the socket from which messages are received.
      */
-    Receiver(SSLSocket socket){
+    Receiver(SSLSocket socket, Client client){
         this.socket = socket;
+        this.client = client;
     }
 
     /**
@@ -34,21 +38,86 @@ import java.io.*;
 
         try {
             InputStream input = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+             this.reader = new BufferedReader(new InputStreamReader(input));
 
-            String message;
+            loggingIn();
 
             while (true) {
-                message = reader.readLine();
 
-                if(null == message )
+                if(message == null)
                     break;
-                else
-                    System.out.println(message);
+                else if (client.isSending()) {
+                    sendingFile();
+                }else if (client.isReceiving()) {
+
+
+                    receivingFile();
+                }else {
+                    this.message = reader.readLine();
+                    System.out.println(this.message);
+                }
             }
 
         }catch (IllegalArgumentException | IOException e){
             System.out.println(e);
+        }
+    }
+
+    private void receivingFile() throws IOException {
+
+        String[] split = message.split(" ", 2);
+        if(split[0].equals("Enter")){
+            client.setServerIsSending(true);
+            this.message = reader.readLine();
+            String[] fileContent = message.split(" ");
+            if (fileContent[0].equals("file") ) {
+                InputStream inputStream = this.socket.getInputStream();
+                String fileName = fileContent[1];
+                int size = Integer.parseInt(fileContent[2]);
+                byte[] data = new byte[size];
+                inputStream.read(data, 0, data.length);
+                String current = new java.io.File(".").getCanonicalPath();
+                FileOutputStream fileOutputStream = new FileOutputStream(current + "/src/client/" + fileName);
+                fileOutputStream.write(data);
+                fileOutputStream.flush();
+                System.out.println("File received correctly!");
+            }else
+                System.out.println(message);
+
+        }else
+            System.out.println("There was an error with the file transfer. Please try again.");
+
+
+        client.setReceiving(false);
+    }
+
+    void sendingFile() throws IOException {
+
+
+        String[] split = message.split(" ");
+
+        if (split.length == 11)
+            client.setSending(false);
+        else
+           client.setServerIsReceiving(true);
+
+
+    }
+
+    void loggingIn() throws IOException {
+
+        String[] split;
+
+        while (!client.isLoggedIn()){
+
+            this.message = reader.readLine();
+
+            split = this.message.split(" ");
+
+            if(split.length == 9)
+                client.setLoggedIn(true);
+
+            System.out.println(this.message);
         }
     }
 }
