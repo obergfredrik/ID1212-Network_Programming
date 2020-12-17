@@ -1,14 +1,19 @@
-package server;
+package server.model;
 
 public class ChatFile {
 
-    private String name;
+    private final String name;
     private byte[] data;
 
-    ChatFile(String name, byte[] data){
+   public  ChatFile(String name, byte[] data){
         this.name = name;
         this.data = data;
 
+    }
+
+
+    public void setData(byte[] data){
+        this.data = data;
     }
 
     public String getName() {
@@ -18,4 +23,6 @@ public class ChatFile {
     public byte[] getData() {
         return data;
     }
+
+
 }

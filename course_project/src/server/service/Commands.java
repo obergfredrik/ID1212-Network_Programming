@@ -1,11 +1,11 @@
-package server;
+package server.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Commands {
 
-    private List<Command> commands;
+    private final List<Command> commands;
 
     Commands(){
         commands = new ArrayList<>();
@@ -53,8 +53,8 @@ public class Commands {
 
     private class Command{
 
-        private String name;
-        private String description;
+        private final String name;
+        private final String description;
 
         Command(String name, String description){
             this.name = name;

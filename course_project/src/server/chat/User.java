@@ -1,4 +1,4 @@
-package server;
+package server.chat;
 
 /**
  *  Created by: Fredrik Öberg
@@ -6,6 +6,9 @@ package server;
  *  Latest update: -
  *
  */
+
+import server.model.ChatFile;
+import server.service.Messenger;
 
 import javax.net.ssl.SSLSocket;
 import java.io.*;
@@ -17,35 +20,24 @@ import java.io.*;
 public class User implements Runnable {
 
     private final SSLSocket socket;
+    private final Messenger messenger;
     private Room room;
     private String userName;
     private PrintWriter sender;
     private BufferedReader receiver;
-    private boolean connected;
-    private MessageHandler messageHandler;
     private boolean loggedIn;
-    private boolean sending;
-    private boolean receiving;
+    private boolean transferring;
 
     /**
      * Creates a ChatMember object
      *
      * @param socket is the socket of the ChatServer object.
      */
-    User(SSLSocket socket, MessageHandler messageHandler) {
+    User(SSLSocket socket, Messenger messenger) {
         this.socket = socket;
-        this.messageHandler = messageHandler;
-        this.connected = true;
+        this.messenger = messenger;
+        this.loggedIn = false;
         this.userName = "";
-
-        try{
-            InputStream input = this.socket.getInputStream();
-            this.receiver = new BufferedReader(new InputStreamReader(input));
-            this.sender = new PrintWriter(this.socket.getOutputStream(), true);
-
-        }catch (IOException e){
-            System.out.println(e);
-        }
     }
 
     /**
@@ -56,65 +48,71 @@ public class User implements Runnable {
      * thereby closing the connection and removing the user from the server.
      */
     public void run() {
-        String message;
 
-        sendMessage("Hi and welcome to the chat! Please enter your user name: ");
 
         try {
+            this.receiver = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+            this.sender = new PrintWriter(this.socket.getOutputStream(), true);
 
-            createUserName();
-            sendMessage("Hi " + getUserName() + "! You are currently in the chat lobby.\nType -h if you need help to get started");
-            setLoggedIn(true);
+            loggingIn();
+            communicating();
+            ending();
 
-            do{
-             message = receiveMessage();
-             this.messageHandler.handleMessage(message, this);
-            }while (this.connected);
-
-            this.socket.close();
         }catch (IllegalArgumentException | IOException e){
             System.out.println(e);
         }
     }
 
-    void createUserName(){
-        try {
-            messageHandler.handleMessage("-n " + receiveMessage(), this);
-        } catch (IOException e) {
-            e.printStackTrace();
-            sendMessage("Could not create new user name. Please try again.");
-            createUserName();
-        }
+    void loggingIn() throws IOException {
+
+        String userName;
+
+        messenger.connectRequest(this);
+
+        do {
+            userName = receiveMessage();
+            String[] split = userName.split(" ", 2);
+            messenger.loginRequest(this, split[0]);
+        }while (!isLoggedIn());
     }
+
+    void communicating() throws IOException {
+
+        String message;
+
+        do{
+            message = receiveMessage();
+            this.messenger.handleMessage(message, this);
+        }while (this.loggedIn);
+    }
+
 
     private String receiveMessage() throws IOException {
         return this.receiver.readLine();
     }
 
-    boolean inChatRoom(){
+    public boolean inChatRoom(){
         return room != null;
     }
 
-    void deConnect(){
-        this.connected = false;
-    }
+
 
     /**
      * Is called upon when a new message has been entered by the connected client.
      * @param message is the message being sent to the chat client.
      */
-    void sendMessage(String message){
+    public void sendMessage(String message){
         this.sender.println(message);
     }
 
-    void setUserName(String userName){
+    public void setUserName(String userName){
         this.userName = userName;
     }
     /**
      * Returns the user name of the connected client.
      * @return is the connected clients user name.
      */
-    String getUserName(){
+    public String getUserName(){
         return this.userName;
     }
 
@@ -135,20 +133,13 @@ public class User implements Runnable {
     }
 
     public boolean isTransferring() {
-        return sending;
+        return transferring;
     }
 
-    public void setSending(boolean sending) {
-        this.sending = sending;
+    public void setTransferring(boolean transferring) {
+        this.transferring = transferring;
     }
 
-    public boolean isReceiving() {
-        return receiving;
-    }
-
-    public void setReceiving(boolean receiving) {
-        this.receiving = receiving;
-    }
 
     public void receiveFileFromClient(String fileName, int size) throws IOException {
 
@@ -162,8 +153,6 @@ public class User implements Runnable {
 
     public void sendFileToClient(ChatFile chatFile) throws IOException {
 
-
-
         byte[] data = chatFile.getData();
 
         sendMessage("file " + chatFile.getName() + " " + data.length);
@@ -172,5 +161,9 @@ public class User implements Runnable {
 
         outputStream.write(data,0,data.length);
         outputStream.flush();
+    }
+
+    void ending() throws IOException {
+        this.socket.close();
     }
 }

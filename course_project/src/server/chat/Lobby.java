@@ -1,26 +1,26 @@
-package server;
+package server.chat;
+
+import server.service.Messenger;
 
 import javax.net.ssl.SSLSocket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Chat {
+public class Lobby {
 
-    private final MessageHandler messageHandler;
+    private final Messenger messenger;
     private final List<Room> rooms;
     private final List<User> users;
 
-    Chat(){
-        this.messageHandler = new MessageHandler(this);
+    public Lobby(){
+        this.messenger = new Messenger(this);
         this.users = new ArrayList<>();
         this.rooms = new ArrayList<>();
-        this.rooms.add(new Room("a"));
-        getChatRoom("a").addChatFile(new ChatFile("f", new byte[]{'a','b','c','\n','x','a','b','c', '\n'}));
     }
 
-    void newUser(SSLSocket socket){
+   public void newUser(SSLSocket socket){
 
-        User user = new User(socket, this.messageHandler);
+        User user = new User(socket, this.messenger);
         this.users.add(user);
         Thread thread = new Thread(user);
         thread.start();
@@ -58,9 +58,9 @@ public class Chat {
         return false;
     }
 
-    private void checkUserRoomPresence(User user){
+    public void checkUserRoomPresence(User user){
         if (user.inChatRoom()) {
-            messageHandler.leftRoom(user);
+            messenger.leftRoom(user);
             leaveChatRoom(user);
         }
     }
@@ -75,7 +75,7 @@ public class Chat {
         return null;
     }
 
-    boolean checkUserName(String userName){
+    public boolean checkUserName(String userName){
 
         for (User u: this.users)
             if (u.getUserName().equals(userName))
@@ -93,7 +93,7 @@ public class Chat {
         return false;
     }
 
-    void leaveChatRoom(User user){
+    public void leaveChatRoom(User user){
 
         Room room = user.getChatRoom();
 
@@ -110,16 +110,18 @@ public class Chat {
      * Removes a user and its associated thread from the chatMembers and threads lists.
      * @param user is the chat user being removed
      */
-    void removeUser(User user){
+    public void removeUser(User user){
 
         if (user.inChatRoom())
-            messageHandler.leftRoom(user);
+            if(1 < user.getChatRoom().getPresentUsers())
+                messenger.leftRoom(user);
+            else
+                rooms.remove(user.getChatRoom());
 
         users.remove(user);
-        user.deConnect();
+        user.setLoggedIn(false);
 
         System.out.println("Number of connected users: " + users.size());
-
     }
 
     public List<Room> getChatRooms() {

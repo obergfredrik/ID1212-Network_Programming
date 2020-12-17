@@ -1,12 +1,14 @@
-package server;
+package server.chat;
+
+import server.model.ChatFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Room {
 
-    private List<User> users;
-    private List<ChatFile> files;
+    private final List<User> users;
+    private final List<ChatFile> files;
     private String chatRoomName;
 
     Room(String chatRoomName){
@@ -31,7 +33,11 @@ public class Room {
     }
 
     public void addChatFile(ChatFile file) {
-        this.files.add(file);
+
+        if (hasFile(file.getName()))
+            getChatFile(file.getName()).setData(file.getData());
+        else
+            this.files.add(file);
     }
 
     public boolean hasFile(String fileName){

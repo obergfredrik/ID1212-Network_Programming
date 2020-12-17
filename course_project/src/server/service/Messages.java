@@ -1,4 +1,7 @@
-package server;
+package server.service;
+
+import server.chat.Room;
+import server.chat.User;
 
 import java.util.List;
 
@@ -69,15 +72,15 @@ public class Messages {
     }
 
     String quitMessage(User user){
-        return "Bye " + user.getUserName() + "! Hope to see you back again soon.";
+        return "Bye \"" + user.getUserName() + "\"! Hope to see you back again soon.";
     }
 
     String userNameUpdated(String username){
-        return "Your new username is " + username;
+        return "Your new username is \"" + username + "\"";
     }
 
     String changedUsername(String oldName, String newName){
-        return oldName + " has changed name to " + newName;
+        return "\"" + oldName + "\" has changed name to \"" + newName + "\"";
     }
 
     String listUsers(User user){
