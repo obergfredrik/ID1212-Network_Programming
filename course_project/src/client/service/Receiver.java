@@ -51,7 +51,7 @@ public class Receiver implements Runnable{
             communicating();
 
         }catch(IOException | ServerDisconnectedException e){
-           e.printStackTrace();
+           System.out.println(e);
            System.exit(1);
         }
     }
@@ -95,12 +95,12 @@ public class Receiver implements Runnable{
             if(message == null)
                 throw new ServerDisconnectedException("The server has disconnected");
 
-            System.out.println(message);
-
             if (client.isSending()) {
                 sendingFile();
             }else if (client.isReceiving())
                 receivingFile();
+            else
+                System.out.println(message);
 
 
         } while (client.isLoggedIn());
@@ -116,21 +116,21 @@ public class Receiver implements Runnable{
      */
     void sendingFile() throws IOException {
 
-        String[] split;
-
         do {
-            split = message.split(" ");
-
-            if (split[0].equals("You"))
+            if (message.equals("ChatRoom"))
                 client.setSending(false);
-            else if(split[0].equals("Enter"))
-                client.setServerTransferring(true);
-            else {
-                this.message = reader.readLine();
+            else if(message.equals("OK")) {
+                client.setTransferring(true);
+                client.setSending(false);
+                System.out.println("The file was uploaded successfully!");
+            }else {
                 System.out.println(message);
+                this.message = reader.readLine();
             }
 
         }while (client.isSending());
+
+        client.setTransferring(false);
     }
 
     /**
@@ -144,26 +144,19 @@ public class Receiver implements Runnable{
 
         do {
 
-            split = message.split(" ", 2);
+            split = message.split(" ", 3);
 
-            if (split[0].equals("Enter")) {
-
-                client.setServerTransferring(true);
-                String[] fileContent = extractFileContent();
-
-                if (fileContent[0].equals("file")) {
-                    byte[] data = receiveFileData(Integer.parseInt(fileContent[2]));
-                    storeFileToDisk(fileContent[1], data);
-                } else
-                    System.out.println(message);
-
-            }else if(split[0].equals("You")){
+            if (split[0].equals("OK")) {
+                byte[] data = receiveFileData(Integer.parseInt(split[2]));
+                storeFileToDisk(split[1], data);
                 client.setReceiving(false);
-            }else {
-                this.message = reader.readLine();
+            }else if(split[0].equals("There") || split[0].equals("You") ) {
+                client.setReceiving(false);
                 System.out.println(message);
+            }else {
+                System.out.println(message);
+                message = reader.readLine();
             }
-
 
         }while (client.isReceiving());
 
@@ -178,12 +171,11 @@ public class Receiver implements Runnable{
      * @throws IOException if there has been some issues with the file storing.
      */
     void storeFileToDisk(String fileName, byte[] data) throws IOException {
-
         String current = new File(".").getCanonicalPath();
         FileOutputStream fileOutputStream = new FileOutputStream(current + "/src/client/" + fileName);
         fileOutputStream.write(data);
         fileOutputStream.flush();
-        System.out.println("File received correctly!");
+        System.out.println("The file \"" + fileName + "\" was downloaded successfully!");
     }
 
     /**
@@ -200,16 +192,5 @@ public class Receiver implements Runnable{
         inputStream.read(data, 0, data.length);
 
         return data;
-    }
-
-    /**
-     * Extracts the name and size of the file data being received.
-     *
-     * @return is the received file content.
-     * @throws IOException if there has been some issues with reading from the socket inputStream.
-     */
-    String[] extractFileContent() throws IOException {
-        this.message = reader.readLine();
-        return message.split(" ");
     }
 }

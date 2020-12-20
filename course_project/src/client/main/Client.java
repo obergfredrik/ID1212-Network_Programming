@@ -205,11 +205,9 @@ public class Client {
 
     /**
      * A setter for the serverTransferring class attribute.
-     *
-     * @param serverTransferring is the new value for the class attribute serverTransferring.
      */
-    public void setServerTransferring(boolean serverTransferring) {
-        this.serverTransferring = serverTransferring;
+    public void setTransferring(boolean transferring) {
+        serverTransferring = transferring;
     }
 
     /**

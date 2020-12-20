@@ -1,6 +1,6 @@
- /**
+ /*
  *  Created by: Fredrik Öberg
- *  Date of creation:
+ *  Date of creation: 201217
  *  Latest update: -
  *
  */
@@ -117,7 +117,6 @@ public class Server {
             do {
                 socket = (SSLSocket) serverSocket.accept();
                 this.lobby.newUser(socket);
-
             }while(true);
 
         } catch (IOException e) {
@@ -143,14 +142,14 @@ public class Server {
         } else
             portNumber = 1234;
 
-        Server server = null;
+        Server server;
 
         try {
             server = new Server();
+            server.initiateServer(portNumber);
         } catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | CertificateException | NoSuchProviderException | IOException e) {
             e.printStackTrace();
         }
 
-        server.initiateServer(portNumber);
     }
 }

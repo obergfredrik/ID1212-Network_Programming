@@ -9,6 +9,7 @@ package client.service;
 
 import client.service.exceptions.FileTransferDeniedException;
 import client.main.Client;
+import javax.naming.SizeLimitExceededException;
 import javax.net.ssl.SSLSocket;
 import java.io.*;
 
@@ -27,6 +28,8 @@ public class Sender implements Runnable{
     private String message;
     private final Client client;
     private final int MAX_FILE_SIZE = 1024*1024;
+    private final int MAX_USERNAME_LENGTH = 32;
+    private final int MAX_MESSAGE_LENGTH = 256;
 
     /**
      * Creates an instance of the Sender class.
@@ -69,8 +72,14 @@ public class Sender implements Runnable{
    private void loggingIn() throws IOException, InterruptedException {
         do {
             message = this.reader.readLine();
-            this.sender.println(message);
-            Thread.sleep(100);
+
+            if (MAX_USERNAME_LENGTH <= message.length() || message.isEmpty())
+                System.out.println("The user name can not be empty or longer than " + MAX_USERNAME_LENGTH + " characters. Choose another one!");
+            else {
+                this.sender.println(message);
+                Thread.sleep(100);
+            }
+
         }while (!client.isLoggedIn());
     }
 
@@ -90,10 +99,18 @@ public class Sender implements Runnable{
             message = this.reader.readLine();
             split = message.split(" ", 2);
 
-            if(split[0].equals("-s"))
-                initiateSendFileState();
+            if(MAX_MESSAGE_LENGTH < message.length())
+                System.out.println("The message is to long. Send a shorter one!");
+            else if (split[0].equals("-n")){
+                if (split.length > 1 && split[1].length() <= MAX_USERNAME_LENGTH)
+                    this.sender.println(message);
+                else
+                    System.out.println("The user name can not be empty or longer than " + MAX_USERNAME_LENGTH + " characters. Choose another one!");
+            }
+            else if(split[0].equals("-s"))
+                initiateSendFileState(split);
             else if(split[0].equals("-g"))
-                initiateReceiveFileState();
+                initiateReceiveFileState(split);
             else
                 this.sender.println(message);
 
@@ -103,22 +120,18 @@ public class Sender implements Runnable{
 
 
     /**
-     * called when the receive state is being initiated. Sets the receiving attribute to true and waits for the
-     * server to respond and after that takes the filename of interest as input from standard in and sends it to the server.
-     *
-     * @throws IOException when there has been some issues with the input from standard in.
+     * Called when the receive state is being initiated. Checks if a name has been entered and, if true, sets the
+     * receive attribute to true initiating the receive state and thereafter sends the complete file request to the server.
      */
-    private void initiateReceiveFileState() throws IOException {
-        try {
+    private void initiateReceiveFileState(String[] getRequest){
+
+            if (1 == getRequest.length) {
+                System.out.println("You need to enter a file name");
+                return;
+            }
+
             client.setReceiving(true);
             this.sender.println(message);
-            waitForServerReceiveResponse();
-            String fileName = enterFileName();
-            this.sender.println("-g " + fileName);
-
-        } catch (FileTransferDeniedException e) {
-        }
-        client.setReceiving(false);
     }
 
     /**
@@ -129,56 +142,39 @@ public class Sender implements Runnable{
      *
      * @throws IOException when there has been some issues with the input from standard in.
      */
-    void initiateSendFileState( ) throws IOException {
+    void initiateSendFileState(String[] input) throws IOException {
+
         String fileName = null;
+
         try {
-            client.setSending(true);
-            this.sender.println(message);
-            waitForServerSendResponse();
-            fileName = enterFileName();
-
+            fileName = extractFileName(input[1]);
             File file = getFile(fileName);
-            int size = (int) file.length();
+            int size = getFileSize(file);
+            FileInputStream fileInputStream = new FileInputStream(file);
 
-            if (checkFileSize(size)) {
-                this.sender.println("-s size");
-                return;
-            }
-
-            sendFile(new FileInputStream(file), fileName, size);
+            client.setSending(true);
+            this.sender.println("-s " + fileName + " " + size);
+            waitForServerSendResponse();
+            sendFile(fileInputStream, size);
 
         } catch (FileNotFoundException e) {
-            this.sender.println("-s file " + fileName);
+           System. out.println("Could not find a file with the name \"" + fileName + "\"");
         } catch (FileTransferDeniedException e) {
+            System.out.println("Enter a chat room to send a file to the server.");
+        }catch (ArrayIndexOutOfBoundsException e){
+            System.out.println("You need to enter a file name.");
+        } catch (SizeLimitExceededException e) {
+            System.out.println("The size of the file is to large");
         }
-
-        client.setSending(false);
     }
 
     /**
-     * Takes input from standard in and processes the input so that it follows the intended format.
+     * Extracts the file name from the input from standard in.
      *
      * @return is the name of the file of interest.
-     * @throws IOException when there has been some issues with the input from standard in.
      */
-    private String enterFileName() throws IOException {
-       String fileName = this.reader.readLine();
-       return fileName.split(" ", 2)[0];
-    }
-
-    /**
-     * Wats for the server to send a response to the sent receive request and is received at the <>Receiver</> class. The receiver
-     * sets the client attribute serverTransferring to true if the response is correct and the isSending
-     * attribute to false if there has been some issues with the file transfer.
-     *
-     * @throws FileTransferDeniedException is thrown when the server denies the file transfer.
-     */
-    private void waitForServerReceiveResponse() throws FileTransferDeniedException {
-
-        while (!client.isServerTransferring())
-            if (!client.isReceiving())
-                throw new FileTransferDeniedException("The server denied the file transfer initiation");
-
+    private String extractFileName(String input) {
+       return input.split(" ", 2)[0];
     }
 
     /**
@@ -213,30 +209,32 @@ public class Sender implements Runnable{
      * Extracts a file and stores it in an array of bytes and sends the byte array to the server.
      *
      * @param fileInputStream is the object retrieving the file from local storage and stores in an array of byte.
-     * @param fileName is the name of the file being sent.
      * @param size is the size of the file being sent
      * @throws IOException when there has been some issues with the reading of the file.
      */
-    private void sendFile(FileInputStream fileInputStream, String fileName, int size ) throws IOException {
-
-        this.sender.println("-s " + fileName + " " + size);
+    private void sendFile(FileInputStream fileInputStream,  int size ) throws IOException {
 
         byte[] data = new byte[size];
         OutputStream outputStream = socket.getOutputStream();
         fileInputStream.read(data);
         outputStream.write(data,0,data.length);
         outputStream.flush();
-
     }
 
     /**
-     * Checks that the file being sent is not to large.
+     * Extract the size of a given file and checks that the file is not to large.
      *
-     * @param size is the size of the file being sent.
-     * @return is true if the file is of proper size.
+     * @param file is the file whose size if of importance.
+     * @return is the size of the file.
      */
-    private boolean checkFileSize(int size){
-        return MAX_FILE_SIZE < size;
+    private int getFileSize(File file ) throws SizeLimitExceededException {
+
+        int size = (int) file.length();
+
+        if (MAX_FILE_SIZE < size)
+           throw new SizeLimitExceededException();
+
+        return size;
     }
 
     /**
